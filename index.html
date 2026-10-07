@@ -58,7 +58,7 @@ button{font:inherit;color:inherit}
 .btn:hover{border-color:var(--accent)}
 .btn:disabled{opacity:.45;cursor:default}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-#themeIco svg{width:16px;height:16px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+#fsIco svg,#themeIco svg{width:16px;height:16px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .sw{width:28px;height:16px;border-radius:9px;background:var(--line);position:relative;flex:none}
 .sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--surface);transition:left .2s}
 .btn[aria-pressed="true"] .sw{background:var(--accent)}
@@ -361,6 +361,7 @@ ol.fcts li::marker{font-family:var(--f-mono);color:var(--accent);font-weight:700
       <span class="sub">SAÉ 5.02 · IUT Nord Franche-Comté · Grégoire, Dylan, Jules, Flavio</span>
     </div>
     <div class="acts">
+      <button class="btn" id="fsBtn" type="button" hidden><span id="fsIco" aria-hidden="true"></span><span id="fsLbl">Plein écran</span></button>
       <button class="btn" id="themeBtn" type="button" aria-label="Changer de thème"><span id="themeIco" aria-hidden="true"></span><span id="themeLbl">Mode sombre</span></button>
       <button class="btn" id="netBtn" type="button" aria-pressed="false"><span class="sw"></span>Voir les réseaux</button>
       <button class="btn" id="ipBtn" type="button">Plan d’adressage</button>
@@ -1414,6 +1415,30 @@ function renderBloc(){
 }
 
 
+
+/* ===================== PLEIN ÉCRAN ===================== */
+(function(){
+  const root=document.documentElement,btn=$("#fsBtn");
+  const req=root.requestFullscreen||root.webkitRequestFullscreen;
+  const exit=document.exitFullscreen||document.webkitExitFullscreen;
+  const enabled=document.fullscreenEnabled||document.webkitFullscreenEnabled;
+  if(!req||!enabled)return;            /* iPhone : pas de plein écran pour une page, le bouton reste caché */
+  const IN='<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  const OUT='<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+  const cur=()=>document.fullscreenElement||document.webkitFullscreenElement;
+  const sync=()=>{const on=!!cur();$("#fsIco").innerHTML=on?OUT:IN;$("#fsLbl").textContent=on?"Quitter le plein écran":"Plein écran";btn.setAttribute("aria-pressed",String(on));};
+  btn.hidden=false;sync();
+  const mac=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);
+  let hintT=null;
+  const hint=()=>{$("#fsLbl").textContent=mac?"Raccourci : ⌃⌘F":"Raccourci : F11";clearTimeout(hintT);hintT=setTimeout(sync,4000);};
+  btn.addEventListener("click",()=>{
+    if(cur()){try{exit.call(document);}catch(e){}return;}
+    try{const r=req.call(root);if(r&&r.catch)r.catch(hint);}catch(e){hint();return;}
+    /* certains navigateurs intégrés ignorent la demande sans répondre */
+    setTimeout(()=>{if(!cur())hint();},1200);
+  });
+  document.addEventListener("fullscreenchange",sync);document.addEventListener("webkitfullscreenchange",sync);
+})();
 /* ===================== THÈME CLAIR / SOMBRE ===================== */
 (function(){
   const root=document.documentElement;
