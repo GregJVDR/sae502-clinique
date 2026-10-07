@@ -58,7 +58,7 @@ button{font:inherit;color:inherit}
 .btn:hover{border-color:var(--accent)}
 .btn:disabled{opacity:.45;cursor:default}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-#fsIco svg,#themeIco svg{width:16px;height:16px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+#sndIco svg,#fsIco svg,#themeIco svg{width:16px;height:16px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .sw{width:28px;height:16px;border-radius:9px;background:var(--line);position:relative;flex:none}
 .sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--surface);transition:left .2s}
 .btn[aria-pressed="true"] .sw{background:var(--accent)}
@@ -362,6 +362,7 @@ ol.fcts li::marker{font-family:var(--f-mono);color:var(--accent);font-weight:700
     </div>
     <div class="acts">
       <button class="btn" id="fsBtn" type="button" hidden><span id="fsIco" aria-hidden="true"></span><span id="fsLbl">Plein écran</span></button>
+      <button class="btn" id="sndBtn" type="button" aria-pressed="true" aria-label="Activer ou couper le son"><span id="sndIco" aria-hidden="true"></span><span id="sndLbl">Son</span></button>
       <button class="btn" id="themeBtn" type="button" aria-label="Changer de thème"><span id="themeIco" aria-hidden="true"></span><span id="themeLbl">Mode sombre</span></button>
       <button class="btn" id="netBtn" type="button" aria-pressed="false"><span class="sw"></span>Voir les réseaux</button>
       <button class="btn" id="ipBtn" type="button">Plan d’adressage</button>
@@ -852,6 +853,38 @@ ol.fcts li::marker{font-family:var(--f-mono);color:var(--accent);font-weight:700
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const REDUCE=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* ===================== SONS (synthétisés, aucun fichier) ===================== */
+let QUIET=false;
+const SND=(function(){
+  let ctx=null,on=true;const last={};
+  try{on=localStorage.getItem("sae502-sound")!=="off";}catch(e){}
+  function ac(){if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ctx=new C();}if(ctx.state==="suspended")ctx.resume();return ctx;}
+  function tone(f,dur,type,vol,when,slideTo){
+    const c=ac();if(!c)return;const t=c.currentTime+(when||0);
+    const o=c.createOscillator(),g=c.createGain();o.type=type||"sine";
+    o.frequency.setValueAtTime(f,t);if(slideTo)o.frequency.exponentialRampToValueAtTime(slideTo,t+dur);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.04,t+0.012);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.03);
+  }
+  const S={
+    click:()=>tone(1500,0.035,"triangle",0.025),
+    send:()=>tone(620,0.08,"sine",0.022,0,940),
+    ok:()=>{tone(880,0.13,"sine",0.04);tone(1320,0.2,"sine",0.035,0.08);},
+    bad:()=>tone(170,0.2,"square",0.022,0,110),
+    pop:()=>tone(520,0.09,"sine",0.032,0,800),
+    alarm:()=>{tone(880,0.11,"sawtooth",0.016);tone(660,0.11,"sawtooth",0.016,0.13);tone(880,0.11,"sawtooth",0.016,0.26);},
+    step:()=>tone(420,0.1,"triangle",0.028,0,640),
+    open:()=>tone(280,0.18,"sine",0.03,0,620),
+    close:()=>tone(620,0.15,"sine",0.024,0,280),
+    door:()=>{tone(1250,0.07,"square",0.018);tone(1650,0.1,"square",0.018,0.1);},
+    deny:()=>{tone(240,0.12,"square",0.022);tone(200,0.2,"square",0.022,0.14);}
+  };
+  return {
+    play(n){if(!on||QUIET)return;const now=performance.now();if(last[n]&&now-last[n]<70)return;last[n]=now;try{S[n]&&S[n]();}catch(e){}},
+    get on(){return on;},
+    set(v){on=v;try{localStorage.setItem("sae502-sound",v?"on":"off");}catch(e){}}
+  };
+})();
 const NS="http://www.w3.org/2000/svg";
 function el(tag,a,parent,text){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
 const svg=$("#plan");
@@ -1106,6 +1139,7 @@ function mark(p,ok){
 }
 function bubble(p,text,dy){
   dy=dy==null?-30:dy;
+  SND.play(/alerte|panne|inondation|infecté|inconnu|!/i.test(text)?"alarm":"pop");
   const g=el("g",{class:"bubble popin"},L.fx);
   const t=el("text",{x:p[0],y:p[1]+dy,"text-anchor":"middle"},g,text);
   let w=text.length*6+16;try{const m=t.getComputedTextLength();if(m)w=m+16;}catch(e){}
@@ -1119,7 +1153,8 @@ function fly(pts,kind,instant,end){
     const halo=el("circle",{r:15,class:"halo",style:`fill:${col}`},L.fx);
     const dot=el("circle",{r:7,class:"pkt",style:`fill:${col}`},L.fx);
     const last=pts[pts.length-1];
-    const done=()=>{dot.remove();halo.remove();if(end!==false&&kind!=="info")mark(last,kind==="ok");res();};
+    const done=()=>{dot.remove();halo.remove();if(end!==false&&kind!=="info"){mark(last,kind==="ok");if(!instant)SND.play(kind==="ok"?"ok":"bad");}res();};
+    if(!instant)SND.play("send");
     if(instant||REDUCE){done();return;}
     const len=poly.getTotalLength();poly.style.strokeDasharray=len;poly.style.strokeDashoffset=len;
     const dur=Math.min(2600,Math.max(700,len*1.9));let t0=null;
@@ -1365,7 +1400,7 @@ function startScen(k){
 }
 async function goStep(n){
   const s=SCEN[curScen];curStep=Math.max(0,Math.min(s.steps.length-1,n));
-  resetFx();const my=runId;
+  resetFx();const my=runId;SND.play("step");
   $("#player").innerHTML=`<div class="player"><div class="progress">${s.steps.map((_,i)=>`<i class="${i<=curStep?"on":""}${i===curStep?" cur":""}"></i>`).join("")}</div>
   <span class="stepn">Étape ${curStep+1} sur ${s.steps.length}</span><p>${esc(s.steps[curStep].t)}</p>
   <div class="ctl"><button class="btn" type="button" id="spv" ${curStep===0?"disabled":""}>◀ Précédent</button>${curStep<s.steps.length-1?`<button class="btn primary" type="button" id="snx">Étape suivante ▶</button>`:`<button class="btn" type="button" id="srs">Rejouer depuis le début</button>`}</div></div>`;
@@ -1373,7 +1408,7 @@ async function goStep(n){
   if(pv)pv.addEventListener("click",()=>goStep(curStep-1));
   if(nx)nx.addEventListener("click",()=>goStep(curStep+1));
   if(rs)rs.addEventListener("click",()=>goStep(0));
-  for(let i=0;i<curStep;i++){await s.steps[i].a(true);if(my!==runId)return;}
+  QUIET=true;try{for(let i=0;i<curStep;i++){await s.steps[i].a(true);if(my!==runId)return;}}finally{QUIET=false;}
   L.fx.innerHTML="";
   await s.steps[curStep].a(false);
 }
@@ -1407,7 +1442,7 @@ function renderBloc(){
       await fly([[who.x,who.y],[who.x,430],[1020,430],[1045,452]],"info");if(my!==runId)return;
       await fly(toSwitchPts("badge").concat([pt("srv-badge")]),"info");if(my!==runId)return;
       await fly([pt("srv-badge"),pt("sw2"),RT(),pt("sw1"),pt("srv-med")],"info");if(my!==runId)return;
-      if(ok)fly([[1095,440],[1095,540],[1000,600]],"ok");else mark([1045,452],false);})();
+      if(ok){SND.play("door");fly([[1095,440],[1095,540],[1000,600]],"ok");}else{SND.play("deny");mark([1045,452],false);}})();
     const r=$("#bRes");r.className="verdict "+(ok?"ok":"bad");r.innerHTML=`<b>${ok?"Porte ouverte":"Accès refusé"}</b> à ${hm(t)}. ${esc(msg)} Le passage est enregistré.`;
   };
   $("#bRole").addEventListener("change",upd);$("#bDeg").addEventListener("change",upd);$("#bTime").addEventListener("input",upd);
@@ -1416,6 +1451,15 @@ function renderBloc(){
 
 
 
+/* ===================== BOUTON SON + CLIC GLOBAL ===================== */
+(function(){
+  const ON='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>';
+  const OFF='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9l5 6M22 9l-5 6"/></svg>';
+  const sync=()=>{$("#sndIco").innerHTML=SND.on?ON:OFF;$("#sndLbl").textContent=SND.on?"Son":"Muet";$("#sndBtn").setAttribute("aria-pressed",String(SND.on));};
+  sync();
+  $("#sndBtn").addEventListener("click",()=>{SND.set(!SND.on);sync();SND.play("pop");});
+  document.addEventListener("click",e=>{const t=e.target;if(t.closest&&t.closest("button:not(#sndBtn),.room,.eq,.person,a"))SND.play("click");},true);
+})();
 /* ===================== PLEIN ÉCRAN ===================== */
 (function(){
   const root=document.documentElement,btn=$("#fsBtn");
@@ -1455,9 +1499,9 @@ $("#netBtn").addEventListener("click",()=>setNet($("#netBtn").getAttribute("aria
 renderIntro();
 
 /* ===================== TIROIR « LE PROJET » ===================== */
-function openDoc(id){const d=$("#drawer-"+id);if(!d)return;d.hidden=false;d.querySelector(".dclose").focus();}
+function openDoc(id){const d=$("#drawer-"+id);if(!d)return;d.hidden=false;SND.play("open");d.querySelector(".dclose").focus();}
 document.querySelectorAll(".drawer").forEach(d=>{
-  const c=d.querySelector(".dclose");if(c)c.addEventListener("click",()=>d.hidden=true);
+  const c=d.querySelector(".dclose");if(c)c.addEventListener("click",()=>{d.hidden=true;SND.play("close");});
   d.addEventListener("click",e=>{if(e.target===d)d.hidden=true;});
   const tabs=d.querySelector(".dtabs[data-doc]");
   if(tabs)tabs.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;tabs.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",String(x===b)));d.querySelectorAll(".dbody[data-t]").forEach(x=>x.hidden=x.dataset.t!==b.dataset.t);d.querySelector(".drawer-in").scrollTop=0;});
@@ -1476,8 +1520,8 @@ $("#dataBtn").addEventListener("click",()=>openDoc("data"));
 $("#secBtn").addEventListener("click",()=>openDoc("sec"));
 $("#vulnCat").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("#vulnCat").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));const c=b.dataset.cat;$("#vulnTbl").querySelectorAll("tbody tr").forEach(r=>r.hidden=c!=="Tout"&&r.dataset.cat!==c);});
 const dr=$("#drawer");
-$("#projBtn").addEventListener("click",()=>{dr.hidden=false;$("#drawerClose").focus();});
-$("#drawerClose").addEventListener("click",()=>dr.hidden=true);
+$("#projBtn").addEventListener("click",()=>{dr.hidden=false;SND.play("open");$("#drawerClose").focus();});
+$("#drawerClose").addEventListener("click",()=>{dr.hidden=true;SND.play("close");});
 dr.addEventListener("click",e=>{if(e.target===dr)dr.hidden=true;});
 $("#dtabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("#dtabs").querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",String(x===b)));["team","gantt","trello","docs"].forEach(k=>$("#d-"+k).hidden=k!==b.dataset.t);});
 const MEM={"Grégoire":"var(--m-greg)","Dylan":"var(--m-dylan)","Jules":"var(--m-jules)","Flavio":"var(--m-flavio)","Équipe":"var(--m-team)"};
