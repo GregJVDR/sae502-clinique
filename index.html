@@ -1,0 +1,1500 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Plan interactif de la clinique de campagne sécurisée (SAÉ 5.02) : réseau, VLAN, 802.1X, VPN, sécurité, données et suivi du projet.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d7a72'/%3E%3Cpath d='M16 8v16M8 16h16' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Clinique de campagne sécurisée</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout : plan d'architecte de la clinique au centre (tout est cliquable), panneau d'explication à droite, une seule page. */
+:root{
+  --bg:#e9eceb; --surface:#ffffff; --surface-2:#f1f3f2; --ink:#172126; --muted:#5b676d; --line:#d3d9d6;
+  --floor:#fbfaf6; --corridor:#ebe9e2; --wall:#283035; --furn:#b9bfbb; --furn-fill:#f0efe9;
+  --accent:#0d7a72; --accent-ink:#ffffff; --ok:#1f8048; --bad:#c3352a; --warn:#a9650f;
+  --v10:#2763a8; --v20:#2c7d52; --v30:#c0392b; --v40:#6b46c1; --v50:#8a5a2b; --v60:#0e7490; --v99:#a8680f;
+  --m-greg:#2763a8; --m-dylan:#2c7d52; --m-jules:#c0392b; --m-flavio:#d4731a; --m-team:#1a8fb0;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Public Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141413; --surface:#1d1d1b; --surface-2:#262624; --ink:#ecebe6; --muted:#a6a59e; --line:#363632;
+  --floor:#21211f; --corridor:#2a2a27; --wall:#d9d6ce; --furn:#4d4d48; --furn-fill:#2a2a27;
+  --accent:#4fb3a3; --accent-ink:#0f1f1c; --ok:#5cbf7f; --bad:#ef7a66; --warn:#e0a94f;
+  --v10:#6fa4de; --v20:#68bd8a; --v30:#ef7a66; --v40:#a891e6; --v50:#c89b6d; --v60:#4cb8cf; --v99:#e0a94f;
+  --m-greg:#6fa4de; --m-dylan:#68bd8a; --m-jules:#ef7a66; --m-flavio:#eda05a; --m-team:#5fbdd6;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#141413; --surface:#1d1d1b; --surface-2:#262624; --ink:#ecebe6; --muted:#a6a59e; --line:#363632;
+  --floor:#21211f; --corridor:#2a2a27; --wall:#d9d6ce; --furn:#4d4d48; --furn-fill:#2a2a27;
+  --accent:#4fb3a3; --accent-ink:#0f1f1c; --ok:#5cbf7f; --bad:#ef7a66; --warn:#e0a94f;
+  --v10:#6fa4de; --v20:#68bd8a; --v30:#ef7a66; --v40:#a891e6; --v50:#c89b6d; --v60:#4cb8cf; --v99:#e0a94f;
+  --m-greg:#6fa4de; --m-dylan:#68bd8a; --m-jules:#ef7a66; --m-flavio:#eda05a; --m-team:#5fbdd6;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);font-stretch:112%;margin:0;line-height:1.15;text-wrap:balance}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-size:.85em}
+button{font:inherit;color:inherit}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .ttl{display:flex;flex-direction:column;gap:1px;min-width:0}
+.top h1{font-size:clamp(1.15rem,2.2vw,1.5rem);font-weight:800;font-stretch:118%;letter-spacing:-.01em}
+.top .sub{font-size:.8rem;color:var(--muted)}
+.top .acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-size:.85rem;font-weight:600;border:1px solid var(--line);background:var(--surface);padding:7px 13px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#themeIco svg{width:16px;height:16px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.sw{width:28px;height:16px;border-radius:9px;background:var(--line);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--surface);transition:left .2s}
+.btn[aria-pressed="true"] .sw{background:var(--accent)}
+.btn[aria-pressed="true"] .sw::after{left:14px}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 390px;min-height:0}
+.plan{position:relative;min-width:0;min-height:0;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.plan svg{display:block;width:100%;flex:1;min-height:0}
+.side{min-height:0;overflow:auto;background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
+.tabs button{border:0;background:transparent;padding:12px 6px;font-size:.84rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.pane{padding:18px 20px 28px;display:flex;flex-direction:column;gap:14px}
+.pane h2{font-size:1.3rem;font-weight:800}
+.pane h3{font-size:.98rem;font-weight:700}
+.kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--accent)}
+.lead{color:var(--muted);font-size:.92rem}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:600;padding:2px 9px;border-radius:99px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 14px;font-size:.86rem;margin:0}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0;min-width:0}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.rules li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start;font-size:.9rem}
+.rules .ic{width:30px;height:30px;border-radius:6px;background:var(--surface-2);display:flex;align-items:center;justify-content:center}
+.rules svg{width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.links{display:flex;flex-wrap:wrap;gap:6px}
+.links button{font-size:.8rem;font-weight:600;border:1px solid var(--line);background:var(--surface-2);padding:4px 10px;border-radius:5px;cursor:pointer;text-align:left}
+.links button:hover{border-color:var(--accent)}
+.access{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.access li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start;font-size:.88rem;padding:8px 10px;border-radius:6px;border:1px solid var(--line);cursor:pointer;background:var(--surface)}
+.access li:hover{border-color:var(--accent)}
+.access .mk{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--surface);font-size:.85rem}
+.access .y .mk{background:var(--ok)} .access .n .mk{background:var(--bad)}
+.access small{display:block;color:var(--muted);font-size:.8rem}
+.people{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.people button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:8px 10px;cursor:pointer;font-size:.84rem}
+.people button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.people button:hover{border-color:var(--accent)}
+.scen{display:flex;flex-direction:column;gap:6px}
+.scen button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.scen button b{font-size:.9rem}
+.scen button span{font-size:.8rem;color:var(--muted)}
+.scen button:hover,.scen button[aria-pressed="true"]{border-color:var(--accent)}
+.scen button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.player{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:8px;background:var(--surface-2)}
+.player .stepn{font-family:var(--f-mono);font-size:.74rem;color:var(--accent);font-weight:600}
+.player p{font-size:.92rem}
+.player .ctl{display:flex;gap:8px;flex-wrap:wrap}
+.progress{display:flex;gap:4px}
+.progress i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.progress i.on{background:var(--accent)}
+select{font:inherit;font-size:.86rem;padding:6px 9px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);max-width:100%}
+input[type=range]{width:100%;accent-color:var(--accent)}
+label.lbl{display:flex;flex-direction:column;gap:4px;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.tl{position:relative;height:30px;border-radius:4px;background:var(--surface);overflow:hidden;border:1px solid var(--line)}
+.tl .op{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--v30) 28%,var(--surface));border-inline:2px solid var(--v30)}
+.tl .now{position:absolute;top:0;bottom:0;width:3px;background:var(--ink)}
+.tl-scale{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:.68rem;color:var(--muted)}
+.verdict{padding:10px 12px;border-radius:6px;font-size:.9rem;border:2px solid var(--line);background:var(--surface)}
+.verdict.ok{border-color:var(--ok)}.verdict.bad{border-color:var(--bad)}
+
+/* Plan SVG */
+svg text{font-family:var(--f-body);fill:var(--ink)}
+.room{fill:var(--floor);cursor:pointer;transition:fill .3s}
+.room:hover{fill:color-mix(in srgb,var(--accent) 6%,var(--floor))}
+.room.sel{fill:color-mix(in srgb,var(--accent) 12%,var(--floor))}
+.room:focus{outline:none}
+.corr{fill:var(--corridor)}
+.wall{stroke:var(--wall);stroke-width:10;stroke-linecap:square;fill:none}
+.win{fill:var(--floor);stroke:var(--wall);stroke-width:1.4}
+.door{stroke:var(--muted);stroke-width:1.2;fill:none}
+.furn{fill:var(--furn-fill);stroke:var(--furn);stroke-width:1.4}
+.furn-l{fill:none;stroke:var(--furn);stroke-width:1.4}
+.rlabel{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.rarea{font-size:10px;font-family:var(--f-mono);fill:var(--muted)}
+.rvlan{font-size:10px;font-family:var(--f-mono);font-weight:600;opacity:0;transition:opacity .3s}
+.net .rvlan{opacity:1}
+.ico{fill:var(--surface);stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.ico-l{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.eq,.person{cursor:pointer}
+.eq .hit,.person .hit{fill:transparent;stroke:none}
+.ring{fill:none;stroke:var(--accent);stroke-width:2.5;opacity:0;transition:opacity .2s}
+.eq:hover .ring,.person:hover .ring,.eq:focus .ring,.person:focus .ring{opacity:.55}
+.eq.sel .ring,.person.sel .ring{opacity:1}
+.eq.hl .ring,.person.hl .ring{opacity:1;animation:pulse 1.4s ease-in-out infinite}
+.eq.bad .ring,.person.bad .ring{opacity:1;stroke:var(--bad)}
+.eq.bad .ico{fill:color-mix(in srgb,var(--bad) 25%,var(--surface))}
+.eq.good .ring{opacity:1;stroke:var(--ok)}
+.eq.down{opacity:.3}
+.eq:focus,.person:focus{outline:none}
+@keyframes pulse{50%{stroke-width:5;opacity:.5}}
+.elabel{font-size:9.5px;font-weight:600;fill:var(--muted)}
+.plabel{font-size:9.5px;font-weight:700}
+.cable{fill:none;stroke-width:2;opacity:0}
+.net .cable{opacity:.75}
+.core{fill:none;stroke:var(--ink);stroke-width:2.2;opacity:.6}
+.core.hsrp{stroke:var(--accent);stroke-dasharray:3 3;opacity:1}
+.uplink{fill:none;stroke:var(--ink);stroke-width:2;opacity:.45}
+.hb-dot{fill:var(--accent)}
+.tray{fill:none;stroke:var(--furn);stroke-width:6;opacity:.6}
+.tunnel{fill:none;stroke:var(--accent);stroke-width:12;opacity:.18;stroke-linecap:round}
+.tunnel-l{fill:none;stroke:var(--accent);stroke-width:2.4;stroke-dasharray:8 6}
+.blocked-l{fill:none;stroke:var(--bad);stroke-width:2.4;stroke-dasharray:6 5}
+.outlbl{font-size:11px;font-weight:700}
+.outsub{font-size:9.5px;fill:var(--muted);font-family:var(--f-mono)}
+.fx-ok{fill:none;stroke:var(--ok);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.fx-bad{fill:none;stroke:var(--bad);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.fx-info{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.pkt{stroke:var(--surface);stroke-width:2}
+.xm{stroke:var(--bad);stroke-width:4.5;stroke-linecap:round}
+.ck{fill:var(--ok);stroke:var(--surface);stroke-width:2}
+.bubble rect{fill:var(--ink)}
+.bubble text{fill:var(--bg);font-size:10.5px;font-weight:600}
+.legend{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:.78rem;display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center}
+.legend div{display:flex;gap:6px;align-items:center}
+.legend .mono{color:var(--muted)}
+
+/* Tiroir « Le projet » */
+.drawer{position:fixed;inset:0;z-index:40;display:flex;justify-content:flex-end;background:color-mix(in srgb,var(--ink) 35%,transparent)}
+.drawer-in{width:min(860px,100%);height:100%;background:var(--bg);overflow:auto;display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(0,0,0,.2)}
+.drawer-head{position:sticky;top:0;z-index:3;background:var(--surface);border-bottom:1px solid var(--line);padding:14px 20px;display:flex;flex-direction:column;gap:10px}
+.drawer-head .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.dtabs{display:flex;gap:6px;flex-wrap:wrap}
+.dtabs button{border:1px solid var(--line);background:var(--surface);padding:5px 12px;border-radius:5px;font-size:.84rem;font-weight:600;cursor:pointer}
+.dtabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dbody{padding:20px;display:flex;flex-direction:column;gap:18px}
+.team{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
+.member{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--mc);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.member b{font-family:var(--f-display);font-stretch:110%;font-size:1.05rem}
+.member .role{font-size:.7rem;font-weight:700;letter-spacing:.06em;color:var(--mc)}
+.member p{font-size:.82rem;color:var(--muted)}
+.sprints{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.sprint{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.sprint header{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.sprint .when{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.sprint ul{margin:0;padding-left:18px;font-size:.84rem}
+.st-todo{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.st-ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.st-run{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.kpi b{font-family:var(--f-display);font-stretch:112%;font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filters button{border:1px solid var(--line);background:var(--surface);padding:4px 10px;border-radius:99px;font-size:.8rem;font-weight:600;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.gantt{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow-x:auto}
+.g-in{min-width:640px;position:relative}
+.g-row{display:grid;grid-template-columns:290px minmax(0,1fr);border-bottom:1px solid var(--line);min-height:30px;align-items:center}
+.g-row.ph{background:var(--surface-2);font-weight:700}
+.g-row.hd{min-height:62px;align-items:start;padding-top:6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.g-lab{padding:4px 10px;font-size:.8rem;display:flex;gap:8px;min-width:0}
+.g-lab .id{font-family:var(--f-mono);font-size:.7rem;color:var(--muted);min-width:2.2em}
+.g-days{display:grid;grid-template-columns:repeat(3,1fr);text-align:center}
+.g-tr{position:relative;height:100%;min-height:30px;background:linear-gradient(90deg,transparent calc(33.333% - 1px),var(--line) calc(33.333% - 1px) 33.333%,transparent 33.333% calc(66.666% - 1px),var(--line) calc(66.666% - 1px) 66.666%,transparent 66.666%)}
+.g-bar{position:absolute;top:6px;bottom:6px;border-radius:4px;background:var(--bc);color:var(--surface);font-size:.68rem;font-weight:700;display:flex;align-items:center;padding:0 7px;white-space:nowrap;overflow:hidden}
+.g-bar.todo{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--bc) 30%,var(--surface)) 0 6px,color-mix(in srgb,var(--bc) 16%,var(--surface)) 6px 12px);color:var(--ink);border:1.5px solid var(--bc)}
+.g-mark{position:absolute;top:0;bottom:0;border-left:2px dashed var(--accent);pointer-events:none}
+.g-mark span{position:absolute;left:4px;font-family:var(--f-mono);font-size:.62rem;color:var(--accent);font-weight:700;white-space:nowrap;background:var(--surface);padding:0 3px}
+.g-row.dim{opacity:.28}
+.board{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;align-items:flex-start}
+.blist{flex:0 0 230px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.blist h4{margin:0;font-size:.82rem;display:flex;justify-content:space-between;padding:2px 4px}
+.blist h4 span{font-family:var(--f-mono);color:var(--muted);font-weight:400}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:8px;display:flex;flex-direction:column;gap:5px;font-size:.8rem}
+.card .lb{display:flex;gap:4px;flex-wrap:wrap}
+.card .lb i{font-style:normal;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:3px;background:var(--lc);color:var(--surface)}
+.card .meta{font-family:var(--f-mono);font-size:.68rem;color:var(--muted)}
+.card .meta b{color:var(--ok)}
+.card.dim{display:none}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.gallery figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.gallery button{border:0;padding:0;display:block;width:100%;cursor:zoom-in;background:var(--surface-2)}
+.gallery img{display:block;width:100%;aspect-ratio:1.41;object-fit:cover;object-position:top}
+.gallery figcaption{padding:8px 10px;font-size:.82rem}
+.lightbox{position:fixed;inset:0;z-index:60;background:color-mix(in srgb,var(--bg) 90%,transparent);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+.lightbox img{max-width:100%;max-height:100%;border-radius:4px;background:#ffffff;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.tblw{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--surface-2)}
+tr:last-child td{border-bottom:0}
+
+
+/* Volets documents */
+.principles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:8px}
+.principles div{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.principles b{font-family:var(--f-mono);font-size:.86rem;color:var(--accent)}
+.principles span{font-size:.82rem;color:var(--muted)}
+tr.prop td{background:color-mix(in srgb,var(--warn) 6%,transparent)}
+td.m,.m{font-family:var(--f-mono);font-size:.8rem}
+td.ok{color:var(--ok);font-weight:600}td.ko{color:var(--bad);font-weight:700}
+button.see{font-size:.74rem;font-weight:600;border:1px solid var(--line);background:var(--surface-2);padding:2px 9px;border-radius:4px;cursor:pointer;white-space:nowrap}
+button.see:hover{border-color:var(--accent)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}
+.note{font-size:.84rem;color:var(--muted);border-left:3px solid var(--warn);padding:4px 0 4px 12px}
+.note b{color:var(--ink)}
+ul.todo{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:.88rem}
+.fmt{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.fmt .route{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.msgx{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 12px;font-family:var(--f-mono);font-size:.76rem;background:var(--surface-2);border-radius:5px;padding:9px 11px;margin:0}
+.msgx dt{color:var(--muted)}.msgx dd{margin:0;word-break:break-word}
+.db-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.db-col header{display:flex;flex-direction:column;gap:2px}
+.db-col header span{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.ents{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px}
+.ent{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.ent h4{margin:0;padding:6px 10px;font-family:var(--f-mono);font-size:.76rem;background:var(--ec);color:var(--surface)}
+.ent ul{list-style:none;margin:0;padding:7px 10px;display:flex;flex-direction:column;gap:2px;font-family:var(--f-mono);font-size:.72rem}
+.rel{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.ent .pk{font-weight:700;text-decoration:underline}.ent .fk{color:var(--accent)}
+ol.fcts{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+ol.fcts li{font-size:.9rem}
+ol.fcts li span{margin-right:10px}
+ol.fcts li::marker{font-family:var(--f-mono);color:var(--accent);font-weight:700}
+.dbody h3{font-size:1rem}
+.cov{fill:color-mix(in srgb,var(--accent) 7%,transparent);stroke:var(--accent);stroke-width:1.5;stroke-dasharray:6 6;opacity:0;transition:opacity .4s}
+.cov-wave{fill:none;stroke:var(--accent);stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center}
+.net .cov,.showcov .cov{opacity:.85}
+.net .cov-wave,.showcov .cov-wave{animation:covwave 3.2s ease-out infinite}
+.cov.off,.cov-wave.off{display:none}
+@keyframes covwave{from{transform:scale(.06);opacity:.55}to{transform:scale(1);opacity:0}}
+/* ===== Animations ===== */
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes popIn{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.6px)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+@keyframes wave{0%,100%{opacity:.15}40%{opacity:1}}
+@keyframes flow{to{stroke-dashoffset:-28}}
+@keyframes glow{0%,100%{opacity:.12}50%{opacity:.32}}
+@keyframes alarm{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@keyframes ripple{from{transform:scale(1);opacity:.75}to{transform:scale(5);opacity:0}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes zoomIn{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+@keyframes flash{0%,100%{opacity:0}30%,70%{opacity:.6}}
+.L-floor{animation:fade .5s both}
+.wall{stroke-dasharray:1;animation:draw 1s cubic-bezier(.4,0,.2,1) both}
+.door,.win{animation:fade .4s .8s both}
+.L-furn{animation:fade .6s .6s both}
+.L-labels{animation:fade .5s .7s both}
+.L-outside{animation:fade .6s 1s both}
+.L-tray{animation:fade .5s .9s both}
+.pop{transform-box:fill-box;transform-origin:center;animation:popIn .45s cubic-bezier(.3,1.4,.5,1) backwards;transition:transform .2s}
+.eq:hover .pop,.eq:focus .pop,.person:hover .pop,.person:focus .pop{transform:scale(1.12)}
+.bob{animation:bob 3.2s ease-in-out infinite}
+.led{animation:blink 1.6s steps(2,jump-none) infinite}
+.wave{animation:wave 2.2s ease-in-out infinite}
+.tunnel-l{animation:flow 1.2s linear infinite}
+.tunnel{animation:glow 2.6s ease-in-out infinite}
+.blocked-l{animation:flow 2.4s linear infinite reverse}
+.barrier{transform-box:fill-box;transform-origin:center;animation:alarm 1.8s ease-in-out infinite}
+.L-amb{transition:opacity .4s}
+.busy .L-amb{opacity:0}
+.amb-dot{fill:var(--muted);opacity:.55}
+.net .amb-dot{fill:var(--c);opacity:.95}
+.cable{stroke-dasharray:1;stroke-dashoffset:1;transition:opacity .3s,stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1)}
+.net .cable{stroke-dashoffset:0}
+.cable.wifi{stroke-dasharray:2 5;stroke-dashoffset:0}
+.popin{transform-box:fill-box;transform-origin:center;animation:popIn .4s cubic-bezier(.3,1.4,.5,1) both}
+.ripple{fill:none;stroke-width:2;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;animation:ripple .9s ease-out forwards}
+.halo{opacity:.25}
+.doorflash{animation:flash 1.4s ease-in-out 2}
+.lamp-on{transform-box:fill-box;transform-origin:center;animation:alarm .9s ease-in-out infinite}
+.pane>*{animation:fadeUp .35s both}
+.pane>*:nth-child(2){animation-delay:.04s}.pane>*:nth-child(3){animation-delay:.08s}.pane>*:nth-child(4){animation-delay:.12s}.pane>*:nth-child(5){animation-delay:.16s}.pane>*:nth-child(6){animation-delay:.2s}.pane>*:nth-child(n+7){animation-delay:.24s}
+.player{animation:fadeUp .3s both}
+.progress i{transition:background .3s}
+.progress i.cur{transform-origin:left;animation:growX .5s ease-out both}
+.access li{animation:fadeUp .35s both;animation-delay:var(--d,0s)}
+.btn,.links button,.people button,.scen button{transition:transform .15s,border-color .15s,background .2s}
+.btn:hover,.links button:hover,.people button:hover,.scen button:hover{transform:translateY(-1px)}
+.drawer{animation:fade .25s both}
+.drawer-in{animation:slideIn .4s cubic-bezier(.2,.8,.2,1) both}
+.g-bar{transform-origin:left;animation:growX .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0s)}
+.card,.member,.sprint,.kpi{animation:fadeUp .4s both;animation-delay:var(--d,0s)}
+.bar i{transform-origin:left;animation:growX .9s .25s cubic-bezier(.2,.8,.2,1) both}
+.lightbox{animation:fade .2s both}.lightbox img{animation:zoomIn .3s cubic-bezier(.2,.8,.2,1) both}
+
+@media (max-width: 980px){
+  html,body{height:auto}
+  .app{height:auto;display:block}
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .plan{overflow-x:auto;padding:8px}
+  .plan svg{min-width:820px;height:auto;flex:none}
+  .side{border-left:0;border-top:1px solid var(--line)}
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="ttl">
+      <h1>Clinique de campagne sécurisée</h1>
+      <span class="sub">SAÉ 5.02 · IUT Nord Franche-Comté · Grégoire, Dylan, Jules, Flavio</span>
+    </div>
+    <div class="acts">
+      <button class="btn" id="themeBtn" type="button" aria-label="Changer de thème"><span id="themeIco" aria-hidden="true"></span><span id="themeLbl">Mode sombre</span></button>
+      <button class="btn" id="netBtn" type="button" aria-pressed="false"><span class="sw"></span>Voir les réseaux</button>
+      <button class="btn" id="ipBtn" type="button">Plan d’adressage</button>
+      <button class="btn" id="dataBtn" type="button">Rôles et données</button>
+      <button class="btn" id="secBtn" type="button">Sécurité</button>
+      <button class="btn primary" id="projBtn" type="button">Le projet</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <div class="plan" id="planBox">
+      <div class="legend" id="legend" hidden>
+        <b style="font-size:.8rem">VLAN · 10.0.VLAN.0/24</b>
+        <div><span class="dot" style="background:var(--v10)"></span>10 Direction</div>
+        <div><span class="dot" style="background:var(--v20)"></span>20 Administration</div>
+        <div><span class="dot" style="background:var(--v30)"></span>30 Médical</div>
+        <div><span class="dot" style="background:var(--v40)"></span>40 Services</div>
+        <div><span class="dot" style="background:var(--v50)"></span>50 Badges</div>
+        <div><span class="dot" style="background:var(--v60)"></span>60 VPN</div>
+        <div><span class="dot" style="background:var(--v99)"></span>99 Gestion</div>
+        <div class="mono">passerelle .1 · serveurs .10 à .49 · postes .100 à .200</div>
+      </div>
+      <svg id="plan" viewBox="0 0 1200 805" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Plan interactif de la clinique et de son réseau"></svg>
+    </div>
+    <aside class="side">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="t-exp" aria-selected="true">Explorer</button>
+        <button type="button" role="tab" id="t-acc" aria-selected="false">Qui accède ?</button>
+        <button type="button" role="tab" id="t-sce" aria-selected="false">Scénarios</button>
+      </div>
+      <div class="pane" id="pane" aria-live="polite"></div>
+    </aside>
+  </div>
+</div>
+
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer-in" role="dialog" aria-label="Le projet">
+    <div class="drawer-head">
+      <div class="row"><h2 style="font-size:1.25rem">Le projet</h2><button class="btn" id="drawerClose" type="button">Fermer ✕</button></div>
+      <div class="dtabs" role="tablist" id="dtabs">
+        <button type="button" data-t="team" aria-selected="true">Équipe et sprints</button>
+        <button type="button" data-t="gantt" aria-selected="false">Gantt</button>
+        <button type="button" data-t="trello" aria-selected="false">Trello</button>
+        <button type="button" data-t="docs" aria-selected="false">Schémas</button>
+      </div>
+    </div>
+    <div class="dbody" id="d-team">
+      <p class="lead" style="max-width:70ch">Projet mené en méthode agile (Scrum) sur trois sprints, du mercredi 07/10 au vendredi 09/10/2026. L’équipe compte deux PILPRO (pilotage) et deux Cyber (technique), sans membre IOM : la gestion des badges est répartie dans l’équipe.</p>
+      <div class="team">
+        <div class="member" style="--mc:var(--m-greg)"><span class="role">PILPRO · CHEF DE PROJET</span><b>Grégoire</b><p>Pilotage, Trello, Gantt, cahier des charges, document de conception, présentations.</p></div>
+        <div class="member" style="--mc:var(--m-dylan)"><span class="role">PILPRO</span><b>Dylan</b><p>Schémas d’architecture, modèle des bases de données, manuels.</p></div>
+        <div class="member" style="--mc:var(--m-jules)"><span class="role">CYBER · RÉSEAU</span><b>Jules</b><p>Maquette GNS3, VLAN, règles du routeur, RADIUS, Wi-Fi, VPN, tests d’intrusion.</p></div>
+        <div class="member" style="--mc:var(--m-flavio)"><span class="role">CYBER · SERVEURS</span><b>Flavio</b><p>Bases de données, serveurs, sauvegardes, secours, supervision, badges.</p></div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="sprints">
+        <div class="sprint"><header><b>Sprint 1</b><span class="chip st-ok">Rendu</span></header><span class="when">mer. 07/10 avant 8h</span><ul><li>Cahier des charges V1.0</li><li>Trello, Gantt, tableur de suivi</li><li>Schémas d’architecture</li><li>Présentation et rapport</li></ul></div>
+        <div class="sprint"><header><b>Sprint 2</b><span class="chip st-run">En cours</span></header><span class="when">jeu. 08/10 minuit</span><ul><li>Cahier des charges V2.0</li><li>Maquette GNS3</li><li>Réseaux séparés et 802.1X/RADIUS</li><li>Bases de données, preuve d’accès par rôle</li></ul></div>
+        <div class="sprint"><header><b>Sprint 3</b><span class="chip">À venir</span></header><span class="when">ven. 09/10 avant 12h</span><ul><li>VPN, sauvegardes, serveur de secours</li><li>Tests d’intrusion</li><li>Manuels</li><li>Présentation 15 min et vidéo 3 min</li></ul></div>
+      </div>
+      <div class="tblw"><table><thead><tr><th>Risque</th><th>Impact</th><th>Ce qu’on fait</th></tr></thead><tbody>
+        <tr><td>Délai très court (3 jours)</td><td>Élevé</td><td>Version minimale d’abord, priorité aux tâches indispensables.</td></tr>
+        <tr><td>Erreur sur RADIUS / 802.1X</td><td>Élevé</td><td>Procédure pas à pas, configurations sauvegardées sur GitHub.</td></tr>
+        <tr><td>Matériel partagé entre groupes</td><td>Moyen</td><td>Réserver tôt, tout valider d’abord sur GNS3.</td></tr>
+        <tr><td>Pas de membre IOM</td><td>Moyen</td><td>Répartir les badges dans l’équipe ou demander un renfort.</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="dbody" id="d-gantt" hidden>
+      <p class="lead">Les 27 tâches du Gantt, réparties en cinq phases sur les trois jours. Barre pleine : fait. Barre hachurée : à faire. État au rendu du sprint 1.</p>
+      <div class="filters" id="gf"></div>
+      <div class="gantt"><div class="g-in" id="gbody"></div></div>
+    </div>
+    <div class="dbody" id="d-trello" hidden>
+      <p class="lead">Le tableau Trello reprend les tâches du Gantt, rangées par phase. <a href="https://trello.com/b/Dps0OlRi/sae-502-clinique-de-campagne-securisee" target="_blank" rel="noopener" style="color:var(--accent)">Ouvrir sur Trello</a></p>
+      <div class="filters" id="tf"></div>
+      <div class="board" id="board"></div>
+    </div>
+    <div class="dbody" id="d-docs" hidden>
+      <p class="lead">Les schémas remis au sprint 1. Cliquez pour agrandir.</p>
+      <div class="gallery">
+        <figure><button type="button" data-full="img/schema_p1.jpg"><img src="img/schema_p1.jpg" alt="Schéma global de l’infrastructure" loading="lazy"></button><figcaption>Schéma global de l’infrastructure</figcaption></figure>
+        <figure><button type="button" data-full="img/schema_p2.jpg"><img src="img/schema_p2.jpg" alt="Rôles, échanges et fonctions" loading="lazy"></button><figcaption>Rôles, échanges et fonctions</figcaption></figure>
+        <figure><button type="button" data-full="img/schema_p3.jpg"><img src="img/schema_p3.jpg" alt="Environnement de développement" loading="lazy"></button><figcaption>Environnement de développement</figcaption></figure>
+        <figure><button type="button" data-full="img/trello_capture.jpg"><img src="img/trello_capture.jpg" alt="Capture du tableau Trello" loading="lazy"></button><figcaption>Capture du Trello</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="drawer" id="drawer-ip" hidden>
+  <div class="drawer-in" role="dialog" aria-label="Plan d’adressage">
+    <div class="drawer-head">
+      <div class="row"><div><h2 style="font-size:1.25rem">Plan d’adressage</h2><span class="lead" style="font-size:.8rem">Clinique de campagne · réseau 10.0.0.0/16 · version du 07/10/2026</span></div><button class="btn dclose" type="button">Fermer ✕</button></div>
+      <div class="dtabs" role="tablist" data-doc="ip">
+        <button type="button" data-t="vlan" aria-selected="true">Principes et VLAN</button>
+        <button type="button" data-t="eq" aria-selected="false">Équipements</button>
+        <button type="button" data-t="rtr" aria-selected="false">Routeur et liaisons</button>
+        <button type="button" data-t="auth" aria-selected="false">802.1X et VPN</button>
+        <button type="button" data-t="acl" aria-selected="false">Règles d’accès</button>
+        <button type="button" data-t="dns" aria-selected="false">DNS et bascule</button>
+        <button type="button" data-t="todo" aria-selected="false">Points à valider</button>
+      </div>
+    </div>
+    <div class="dbody" data-t="vlan">
+      <div class="principles">
+        <div><b>10.0.<i>VLAN</i>.0/24</b><span>Le 3e nombre de l’adresse est le numéro du VLAN : VLAN 30 → 10.0.30.0/24.</span></div>
+        <div><b>Passerelle en .1</b><span>Le routeur est toujours en .1 dans chaque VLAN.</span></div>
+        <div><b>.10 à .49</b><span>Adresses fixes des serveurs et équipements.</span></div>
+        <div><b>.100 à .200</b><span>Postes, par DHCP, seulement après un 802.1X réussi.</span></div>
+        <div><b>hopital.lan</b><span>Domaine DNS (on évite .local, réservé au mDNS).</span></div>
+        <div><b>Pas d’Internet</b><span>Aucune route par défaut, la dernière règle refuse tout le reste. Pas de VLAN invité.</span></div>
+      </div>
+      <p class="lead">3 VLAN « métier » comme dans le sujet (direction, administration, médical), plus 4 VLAN techniques : services, badges, VPN et gestion.</p>
+      <div class="tblw"><table>
+        <thead><tr><th>VLAN</th><th>Nom</th><th>Réseau</th><th>Passerelle</th><th>DHCP postes</th><th>Contenu</th></tr></thead>
+        <tbody class="mono-cells">
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v10)"></span>10</span></td><td>DIRECTION</td><td class="m">10.0.10.0/24</td><td class="m">10.0.10.1</td><td class="m">.100 à .200</td><td>Postes direction, serveur direction</td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v20)"></span>20</span></td><td>ADMIN</td><td class="m">10.0.20.0/24</td><td class="m">10.0.20.1</td><td class="m">.100 à .200</td><td>Postes administration, serveur admin, base du personnel</td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v30)"></span>30</span></td><td>MEDICAL</td><td class="m">10.0.30.0/24</td><td class="m">10.0.30.1</td><td class="m">.100 à .200</td><td>Postes médicaux, serveur médical, base des patients</td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v40)"></span>40</span></td><td>SERVICES</td><td class="m">10.0.40.0/24</td><td class="m">10.0.40.1</td><td>aucun (IP fixes)</td><td>RADIUS, DNS, serveur de secours, Nagios</td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v50)"></span>50</span></td><td>BADGES</td><td class="m">10.0.50.0/24</td><td class="m">10.0.50.1</td><td>aucun (IP fixes)</td><td>Serveur de badges, lecteur de la salle d’opération</td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v60)"></span>60</span></td><td>VPN</td><td class="m">10.0.60.0/24</td><td class="m">10.0.60.1</td><td>aucun (IP fixes)</td><td>Serveur VPN</td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v99)"></span>99</span></td><td>GESTION</td><td class="m">10.0.99.0/24</td><td class="m">10.0.99.1</td><td>aucun (IP fixes)</td><td>Routeur, switches, borne Wi-Fi</td></tr>
+          <tr><td><span class="chip">999</span></td><td>INUTILISE</td><td>aucun</td><td>aucune</td><td>aucun</td><td>Ports non utilisés, éteints</td></tr>
+        </tbody>
+      </table></div>
+      <p class="lead">DHCP : il tourne sur le routeur, un pool par VLAN 10, 20 et 30 (.100 à .200, DNS = 10.0.40.11, domaine hopital.lan). Un poste reçoit son IP seulement après avoir réussi le 802.1X.</p>
+      <div class="links"><button type="button" data-show="net">Voir les VLAN sur le plan</button></div>
+    </div>
+    <div class="dbody" data-t="eq" hidden>
+      <p class="lead">Chaque machine a un nom DNS dans hopital.lan, une IP fixe et un VLAN. Les bases de données tournent dans Docker sur le serveur de leur espace.</p>
+      <div class="tblw"><table>
+        <thead><tr><th>Nom DNS</th><th>VLAN</th><th>IP</th><th>Rôle</th><th>Logiciel</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="m">rtr.hopital.lan</td><td>99</td><td class="m">10.0.99.1</td><td>Routeur, ACL, DHCP</td><td>Cisco IOS</td><td><button type="button" class="see" data-show="eq:r1">Voir</button></td></tr>
+          <tr><td class="m">sw1.hopital.lan</td><td>99</td><td class="m">10.0.99.11</td><td>Switch n°1 (802.1X)</td><td>Cisco IOS</td><td><button type="button" class="see" data-show="eq:sw1">Voir</button></td></tr>
+          <tr><td class="m">sw2.hopital.lan</td><td>99</td><td class="m">10.0.99.12</td><td>Switch n°2 (802.1X)</td><td>Cisco IOS</td><td><button type="button" class="see" data-show="eq:sw2">Voir</button></td></tr>
+          <tr><td class="m">ap-wifi.hopital.lan</td><td>99</td><td class="m">10.0.99.21</td><td>Borne Wi-Fi Linksys n°1</td><td>DD-WRT</td><td><button type="button" class="see" data-show="eq:ap">Voir</button></td></tr>
+          <tr class="prop"><td class="m">ap-wifi2.hopital.lan</td><td>99</td><td class="m">10.0.99.22</td><td>Borne Wi-Fi n°2, redondance <span class="chip">proposition</span></td><td>DD-WRT</td><td><button type="button" class="see" data-show="eq:ap2">Voir</button></td></tr>
+          <tr><td class="m">srv-dir.hopital.lan</td><td>10</td><td class="m">10.0.10.10</td><td>Serveur direction</td><td>OS serveur au choix</td><td><button type="button" class="see" data-show="eq:srv-dir">Voir</button></td></tr>
+          <tr><td class="m">srv-adm.hopital.lan</td><td>20</td><td class="m">10.0.20.10</td><td>Serveur administration + base du personnel</td><td>OS serveur + Docker</td><td><button type="button" class="see" data-show="eq:srv-adm">Voir</button></td></tr>
+          <tr><td class="m">srv-med.hopital.lan</td><td>30</td><td class="m">10.0.30.10</td><td>Serveur médical + base des patients</td><td>OS serveur + Docker</td><td><button type="button" class="see" data-show="eq:srv-med">Voir</button></td></tr>
+          <tr><td class="m">radius.hopital.lan</td><td>40</td><td class="m">10.0.40.10</td><td>Authentification centralisée</td><td>FreeRADIUS</td><td><button type="button" class="see" data-show="eq:radius">Voir</button></td></tr>
+          <tr><td class="m">dns.hopital.lan</td><td>40</td><td class="m">10.0.40.11</td><td>DNS de l’hôpital</td><td>dnsmasq ou BIND9</td><td><button type="button" class="see" data-show="eq:dns">Voir</button></td></tr>
+          <tr><td class="m">srv-secours.hopital.lan</td><td>40</td><td class="m">10.0.40.20</td><td>Serveur de secours + sauvegardes</td><td>Scripts de sauvegarde, Docker</td><td><button type="button" class="see" data-show="eq:secours">Voir</button></td></tr>
+          <tr><td class="m">nagios.hopital.lan</td><td>40</td><td class="m">10.0.40.30</td><td>Supervision</td><td>Nagios</td><td><button type="button" class="see" data-show="eq:nagios">Voir</button></td></tr>
+          <tr><td class="m">srv-badge.hopital.lan</td><td>50</td><td class="m">10.0.50.10</td><td>Gestion des badges (salle d’opération)</td><td>Code à développer</td><td><button type="button" class="see" data-show="eq:srv-badge">Voir</button></td></tr>
+          <tr><td class="m">lecteur-badge.hopital.lan</td><td>50</td><td class="m">10.0.50.20</td><td>Lecteur de la porte</td><td>IoT, à préciser</td><td><button type="button" class="see" data-show="eq:badge">Voir</button></td></tr>
+          <tr><td class="m">srv-vpn.hopital.lan</td><td>60</td><td class="m">10.0.60.10</td><td>Fin du tunnel VPN</td><td>WireGuard (conseillé) ou IPsec</td><td><button type="button" class="see" data-show="eq:srv-vpn">Voir</button></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="dbody" data-t="rtr" hidden>
+      <p class="lead">Le routeur n’a qu’un seul câble vers le réseau (« router-on-a-stick ») : un trunk qui porte tous les VLAN, avec une sous-interface par VLAN. Les noms de ports sont à adapter aux modèles.</p>
+      <div class="grid2">
+        <div class="tblw"><table>
+          <thead><tr><th>Sous-interface (dot1Q)</th><th>VLAN</th><th>IP / masque</th></tr></thead>
+          <tbody>
+            <tr><td class="m">Fa0/0.10</td><td>10</td><td class="m">10.0.10.1 /24</td></tr>
+            <tr><td class="m">Fa0/0.20</td><td>20</td><td class="m">10.0.20.1 /24</td></tr>
+            <tr><td class="m">Fa0/0.30</td><td>30</td><td class="m">10.0.30.1 /24</td></tr>
+            <tr><td class="m">Fa0/0.40</td><td>40</td><td class="m">10.0.40.1 /24</td></tr>
+            <tr><td class="m">Fa0/0.50</td><td>50</td><td class="m">10.0.50.1 /24</td></tr>
+            <tr><td class="m">Fa0/0.60</td><td>60</td><td class="m">10.0.60.1 /24</td></tr>
+            <tr><td class="m">Fa0/0.99 (native)</td><td>99</td><td class="m">10.0.99.1 /24</td></tr>
+            <tr><td class="m">Fa0/1</td><td>aucun</td><td>éteint : pas de lien Internet</td></tr>
+          </tbody>
+        </table></div>
+        <div class="tblw"><table>
+          <thead><tr><th>Lien</th><th>Type</th><th>VLAN autorisés</th></tr></thead>
+          <tbody>
+            <tr><td class="m">rtr Fa0/0 ↔ sw1 Gi0/1</td><td>Trunk</td><td>10, 20, 30, 40, 50, 60, 99</td></tr>
+            <tr><td class="m">sw1 Gi0/2 ↔ sw2 Gi0/2</td><td>Trunk</td><td>10, 20, 30, 40, 50, 60, 99</td></tr>
+            <tr><td class="m">sw1 ↔ ap-wifi</td><td>À valider</td><td>99</td></tr>
+            <tr class="prop"><td class="m">sw2 ↔ ap-wifi2</td><td>Proposition (redondance)</td><td>99</td></tr>
+            <tr><td>Ports postes (sw1 et sw2)</td><td>Accès, 802.1X, VLAN donné par RADIUS</td><td>Selon le profil</td></tr>
+            <tr><td>Ports serveurs</td><td>Accès fixe dans le VLAN du serveur</td><td>10, 20, 30, 40, 50 ou 60</td></tr>
+            <tr><td>Ports inutilisés</td><td>Éteints (shutdown)</td><td>999</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <p class="lead">Répartition conseillée : sw1 pour srv-dir, srv-adm, srv-med et des postes ; sw2 pour les services communs (VLAN 40), les badges (50), le VPN (60) et des postes. Chaque switch a son IP de gestion en VLAN 99, passerelle 10.0.99.1.</p>
+      <p class="note">Le second routeur R2 visible sur le plan est une <b>évolution proposée pour la maquette GNS3</b> (redondance HSRP). Il ne fait pas partie du plan d’adressage.</p>
+      <div class="links"><button type="button" data-show="eq:r1">Voir le routeur sur le plan</button><button type="button" data-show="s:routeur">Scénario : panne du routeur</button></div>
+    </div>
+    <div class="dbody" data-t="auth" hidden>
+      <h3>Authentification 802.1X</h3>
+      <p class="lead">Le serveur RADIUS répond « accepté » et indique le VLAN du profil. Le switch place alors le port dans ce VLAN. Attributs renvoyés : Tunnel-Type = VLAN, Tunnel-Medium-Type = IEEE-802, Tunnel-Private-Group-Id = numéro du VLAN.</p>
+      <div class="grid2">
+        <div class="tblw"><table>
+          <thead><tr><th>Groupe RADIUS</th><th>Compte d’exemple</th><th>VLAN donné</th></tr></thead>
+          <tbody><tr><td>direction</td><td class="m">dir01</td><td>10</td></tr><tr><td>administration</td><td class="m">adm01</td><td>20</td></tr><tr><td>medical</td><td class="m">med01</td><td>30</td></tr></tbody>
+        </table></div>
+        <div class="tblw"><table>
+          <thead><tr><th>Client RADIUS</th><th>IP</th><th>Secret partagé</th></tr></thead>
+          <tbody><tr><td>sw1</td><td class="m">10.0.99.11</td><td>à définir, hors de GitHub</td></tr><tr><td>sw2</td><td class="m">10.0.99.12</td><td>à définir, hors de GitHub</td></tr><tr><td>ap-wifi</td><td class="m">10.0.99.21</td><td>à définir, hors de GitHub</td></tr><tr class="prop"><td>ap-wifi2 (proposition)</td><td class="m">10.0.99.22</td><td>à définir, hors de GitHub</td></tr></tbody>
+        </table></div>
+      </div>
+      <p class="lead">Wi-Fi : un SSID HOPITAL en WPA2-Enterprise, qui utilise le même RADIUS (UDP 1812 et 1813). Les bornes Linksys WRT54G tournent sous DD-WRT. Le personnel d’entretien n’a pas de compte réseau : son accès se limite à la porte de la salle d’opération (badge, VLAN 50).</p>
+      <p class="note"><b>Proposition :</b> une seconde borne (ap-wifi2, 10.0.99.22), branchée sur sw2, diffuse le même SSID pour la redondance. Elle n’est pas encore dans le plan d’adressage.</p>
+      <div class="links"><button type="button" data-show="s:wifi">Scénario : une borne Wi-Fi tombe en panne</button></div>
+      <div class="links"><button type="button" data-show="s:dot1x">Scénario : un médecin se connecte</button><button type="button" data-show="s:intrus">Scénario : un intrus se branche</button></div>
+      <h3 style="margin-top:8px">VPN avec l’autre hôpital</h3>
+      <p class="lead">Le tunnel ne laisse passer qu’une chose : la consultation de la base médicale (VLAN 30). Rien d’autre, et rien vers Internet. Les adresses de l’autre hôpital sont à confirmer avec l’autre groupe.</p>
+      <div class="tblw"><table>
+        <thead><tr><th>Élément</th><th>Valeur</th></tr></thead>
+        <tbody>
+          <tr><td>Type</td><td>Site à site, entre srv-vpn et le srv-vpn de l’autre hôpital</td></tr>
+          <tr><td>Lien physique</td><td>Carte eth1 de srv-vpn, câble direct, réseau <span class="m">172.16.0.0/30</span> (nous .1, eux .2)</td></tr>
+          <tr><td>Tunnel</td><td class="m">10.99.0.0/30 (nous .1, eux .2)</td></tr>
+          <tr><td>Réseau de l’autre hôpital</td><td><span class="m">10.1.0.0/16</span>, médical distant <span class="m">10.1.30.0/24</span></td></tr>
+          <tr><td>Entrée côté hôpital</td><td>eth0 de srv-vpn : <span class="m">10.0.60.10</span> (VLAN 60)</td></tr>
+          <tr><td>Route sur le routeur</td><td class="m">10.1.30.0/24 via 10.0.60.10</td></tr>
+          <tr><td>Accès autorisé</td><td>10.1.30.0/24 vers bdd-patients (10.0.30.10), port de la base (3306 MariaDB ou 5432 PostgreSQL), compte en lecture seule</td></tr>
+          <tr><td>Tout le reste</td><td>Refusé</td></tr>
+        </tbody>
+      </table></div>
+      <p class="lead">L’accès est limité deux fois : par la règle ACL du routeur et par les droits du compte de la base.</p>
+      <div class="links"><button type="button" data-show="s:vpn">Scénario : échange avec l’autre hôpital</button></div>
+    </div>
+    <div class="dbody" data-t="acl" hidden>
+      <p class="lead">Ces règles se posent sur le routeur, dans l’ordre, sur chaque sous-interface (sens entrant). La règle 15 refuse tout ce qui n’est pas listé plus haut, ce qui bloque aussi Internet. Les réponses doivent pouvoir revenir (« established » sur les règles TCP, ou pare-feu à états).</p>
+      <div class="tblw"><table>
+        <thead><tr><th>N°</th><th>Source</th><th>Destination</th><th>Service</th><th>Action</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>VLAN 10</td><td>VLAN 10 et VLAN 20</td><td>Tout</td><td class="ok">Autoriser</td><td><button type="button" class="see" data-show="p:directrice">Tester</button></td></tr>
+          <tr><td>2</td><td>VLAN 20</td><td>VLAN 20</td><td>Tout</td><td class="ok">Autoriser</td><td><button type="button" class="see" data-show="p:secretaire">Tester</button></td></tr>
+          <tr><td>3</td><td>VLAN 30</td><td>VLAN 30</td><td>Tout</td><td class="ok">Autoriser</td><td><button type="button" class="see" data-show="p:medecin">Tester</button></td></tr>
+          <tr><td>4</td><td>VLAN 10, 20, 30</td><td>dns (10.0.40.11)</td><td>DNS, UDP et TCP 53</td><td class="ok">Autoriser</td><td></td></tr>
+          <tr><td>5</td><td>VLAN 99 (switches, borne)</td><td>radius (10.0.40.10)</td><td>RADIUS, UDP 1812 et 1813</td><td class="ok">Autoriser</td><td><button type="button" class="see" data-show="s:dot1x">Voir</button></td></tr>
+          <tr><td>6</td><td>nagios (10.0.40.30)</td><td>VLAN 10, 20, 30, 50, 60, 99</td><td>ICMP, SNMP (UDP 161), NRPE (TCP 5666)</td><td class="ok">Autoriser</td><td><button type="button" class="see" data-show="eq:nagios">Voir</button></td></tr>
+          <tr><td>7</td><td>srv-secours (10.0.40.20)</td><td>srv-dir, srv-adm, srv-med</td><td>SSH (22), rsync, ports des bases</td><td class="ok">Autoriser (sauvegardes)</td><td><button type="button" class="see" data-show="s:ransom">Voir</button></td></tr>
+          <tr><td>8</td><td>VLAN 20</td><td>srv-secours (10.0.40.20)</td><td>Port de la base du personnel</td><td class="ok">Autoriser (après bascule)</td><td></td></tr>
+          <tr><td>9</td><td>VLAN 30 et 10.1.30.0/24</td><td>srv-secours (10.0.40.20)</td><td>Port de la base des patients</td><td class="ok">Autoriser (après bascule)</td><td><button type="button" class="see" data-show="s:panne">Voir</button></td></tr>
+          <tr><td>10</td><td>srv-badge (10.0.50.10)</td><td>srv-med (10.0.30.10)</td><td>Port de la base des patients</td><td class="ok">Autoriser (opération en cours ?)</td><td><button type="button" class="see" data-show="s:bloc">Voir</button></td></tr>
+          <tr><td>11</td><td>10.1.30.0/24 (autre hôpital)</td><td>srv-med (10.0.30.10)</td><td>Port de la base, lecture seule</td><td class="ok">Autoriser</td><td><button type="button" class="see" data-show="s:vpn">Voir</button></td></tr>
+          <tr><td>12</td><td>VLAN 30</td><td>10.1.30.0/24 (autre hôpital)</td><td>Port de la base</td><td class="ok">Autoriser</td><td><button type="button" class="see" data-show="s:vpn">Voir</button></td></tr>
+          <tr><td>13</td><td>Tout</td><td>La passerelle du VLAN</td><td>ICMP (ping)</td><td class="ok">Autoriser</td><td></td></tr>
+          <tr><td>14</td><td>Postes (pas encore d’IP)</td><td>Le routeur (DHCP)</td><td>DHCP, UDP 67 et 68</td><td class="ok">Autoriser</td><td></td></tr>
+          <tr><td>15</td><td>Tout</td><td>Tout</td><td>Tout</td><td class="ko">Refuser et journaliser</td><td><button type="button" class="see" data-show="s:pirate">Voir</button></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="dbody" data-t="dns" hidden>
+      <p class="lead">Le serveur dns.hopital.lan (10.0.40.11) gère la zone hopital.lan. Chaque machine a un enregistrement A avec son IP. Les applications utilisent des alias, pas des IP.</p>
+      <div class="tblw"><table>
+        <thead><tr><th>Alias</th><th>Normalement</th><th>Après bascule</th><th>Durée de vie (TTL)</th></tr></thead>
+        <tbody>
+          <tr><td class="m">bdd-patients.hopital.lan</td><td>srv-med</td><td>srv-secours</td><td>30 s</td></tr>
+          <tr><td class="m">bdd-personnel.hopital.lan</td><td>srv-adm</td><td>srv-secours</td><td>30 s</td></tr>
+        </tbody>
+      </table></div>
+      <p class="lead">Pour basculer, un script change l’alias vers srv-secours quand le serveur principal ne répond plus (test de Nagios ou ping). On passe par le DNS plutôt que par une IP virtuelle, car le serveur de secours est dans un autre VLAN (40) que les serveurs principaux.</p>
+      <div class="links"><button type="button" data-show="s:panne">Scénario : panne du serveur médical</button></div>
+    </div>
+    <div class="dbody" data-t="todo" hidden>
+      <ul class="todo">
+        <li><b>Droits de la direction.</b> Le cahier des charges dit direction → direction + administration (suivi ici, confirmé par le sujet Moodle). Seules les slides du prof parlent d’un accès aux deux autres VLAN : il suffirait d’ajouter VLAN 10 → VLAN 30 à la règle 1.</li>
+        <li><b>Nombre de VLAN.</b> Le sujet parle de 3 VLAN. 4 VLAN techniques sont ajoutés (40, 50, 60, 99) pour séparer services, badges, VPN et gestion. À expliquer en présentation.</li>
+        <li><b>Matériel.</b> Il n’y a que 4 serveurs physiques. RADIUS, DNS, Nagios, secours et badges doivent tourner en machines virtuelles ou en Docker. À préciser : sur quelle machine.</li>
+        <li><b>Bornes Wi-Fi WRT54G sous DD-WRT.</b> Le firmware DD-WRT est installé : le WPA2-Enterprise avec RADIUS est géré. Reste à tester la séparation des VLAN : soit un SSID par VLAN (interfaces virtuelles de DD-WRT), soit tout le Wi-Fi dans le VLAN 30. L’attribution du VLAN par RADIUS n’est pas garantie sur cette borne.</li>
+        <li><b>Autre hôpital.</b> Plages 10.1.x.x, câble entre les deux serveurs VPN et choix du VPN (WireGuard ou IPsec) à accorder avec l’autre groupe.</li>
+        <li><b>Switches.</b> Le sujet indique des Catalyst « C34/5XX ». On suppose qu’ils ne routent pas, d’où le routage sur le routeur. S’ils routent, les passerelles passent sur les switches.</li>
+        <li><b>Secrets.</b> Les mots de passe RADIUS et VPN ne vont jamais sur GitHub.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="drawer" id="drawer-data" hidden>
+  <div class="drawer-in" role="dialog" aria-label="Rôles, échanges et données">
+    <div class="drawer-head">
+      <div class="row"><div><h2 style="font-size:1.25rem">Rôles, échanges et données</h2><span class="lead" style="font-size:.8rem">Qui utilise le système, quels messages circulent, quelles données sont stockées</span></div><button class="btn dclose" type="button">Fermer ✕</button></div>
+      <div class="dtabs" role="tablist" data-doc="data">
+        <button type="button" data-t="roles" aria-selected="true">Rôles</button>
+        <button type="button" data-t="fmt" aria-selected="false">Formats d’échange</button>
+        <button type="button" data-t="data" aria-selected="false">Données</button>
+        <button type="button" data-t="fct" aria-selected="false">Fonctions</button>
+      </div>
+    </div>
+    <div class="dbody" data-t="roles">
+      <div class="tblw"><table>
+        <thead><tr><th>Rôle</th><th>Qui</th><th>Accès autorisé</th><th>Réseau</th><th>Compte</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v10)"></span>Direction</span></td><td>Directrice, adjoint</td><td>Données de la direction et de l’administration</td><td>VLAN 10</td><td class="m">dir01 (groupe direction)</td><td><button type="button" class="see" data-show="p:directrice">Tester</button></td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v20)"></span>Administration</span></td><td>Secrétariat, comptabilité, RH, accueil</td><td>Données de l’administration</td><td>VLAN 20</td><td class="m">adm01 (groupe administration)</td><td><button type="button" class="see" data-show="p:secretaire">Tester</button></td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v30)"></span>Personnel médical</span></td><td>Médecins, infirmiers, équipe du bloc</td><td>Données médicales ; dossiers de l’autre hôpital ; bloc pendant les opérations</td><td>VLAN 30</td><td class="m">med01 (groupe medical)</td><td><button type="button" class="see" data-show="p:medecin">Tester</button></td></tr>
+          <tr><td><span class="chip">Entretien</span></td><td>Agents d’entretien</td><td>Aucune donnée ; bloc opératoire en dehors des opérations</td><td>badge (VLAN 50)</td><td>aucun compte réseau</td><td><button type="button" class="see" data-show="s:bloc">Tester</button></td></tr>
+          <tr><td><span class="chip" style="color:var(--accent)">Hôpital partenaire</span></td><td>Médecins de l’autre hôpital</td><td>Base des patients en lecture seule, par le VPN</td><td>10.1.30.0/24</td><td>compte de base en lecture seule</td><td><button type="button" class="see" data-show="p:partenaire">Tester</button></td></tr>
+          <tr><td><span class="chip"><span class="dot" style="background:var(--v99)"></span>Administrateurs</span></td><td>Service informatique et réseau (équipe Cyber)</td><td>Switches, routeur, RADIUS, serveurs, sauvegardes, supervision</td><td>VLAN 99 et 40</td><td>comptes d’administration</td><td><button type="button" class="see" data-show="eq:r1">Voir</button></td></tr>
+          <tr><td><span class="chip">Gestionnaires</span></td><td>Responsables des bases patients et personnel</td><td>Droits d’accès et contenu des bases</td><td>selon leur service</td><td>comptes de base de données</td><td><button type="button" class="see" data-show="eq:srv-med">Voir</button></td></tr>
+        </tbody>
+      </table></div>
+      <div class="grid2">
+        <div class="fmt"><h3>Ce que voit l’utilisateur</h3><ul class="todo">
+          <li>Un écran de connexion 802.1X (poste ou Wi-Fi) : identifiant et mot de passe.</li>
+          <li>Les données de son espace uniquement (direction, administration ou médical).</li>
+          <li>Un refus quand l’accès n’est pas autorisé, par exemple administration → données médicales.</li>
+          <li>Au bloc opératoire : une porte à badge.</li></ul></div>
+        <div class="fmt"><h3>Ce que voit l’administrateur</h3><ul class="todo">
+          <li>La console des équipements Cisco : droits et 802.1X.</li>
+          <li>La configuration du serveur RADIUS : utilisateurs, groupes, équipements autorisés.</li>
+          <li>Le tableau de bord de supervision (Nagios).</li>
+          <li>La gestion des sauvegardes et de la bascule principal / secours.</li></ul></div>
+      </div>
+    </div>
+    <div class="dbody" data-t="fmt" hidden>
+      <p class="lead">Les principaux messages qui circulent dans le réseau, avec un exemple pour chacun. Toutes les données d’exemple sont fictives.</p>
+      <div class="grid2">
+        <div class="fmt"><h3>1. Authentification 802.1X</h3><span class="route">poste → switch (EAP) → radius 10.0.40.10, UDP 1812</span>
+          <dl class="msgx"><dt>Demande</dt><dd>Access-Request · User-Name = "med01"</dd><dt>Réponse</dt><dd>Access-Accept</dd><dt></dt><dd>Tunnel-Type = VLAN</dd><dt></dt><dd>Tunnel-Medium-Type = IEEE-802</dd><dt></dt><dd>Tunnel-Private-Group-Id = 30</dd></dl>
+          <div class="links"><button type="button" data-show="s:dot1x">Voir sur le plan</button></div></div>
+        <div class="fmt"><h3>2. Données patients</h3><span class="route">poste médical → bdd-patients (srv-med 10.0.30.10), port 3306</span>
+          <dl class="msgx"><dt>nom</dt><dd>Lambert</dd><dt>prénom</dt><dd>Claire</dd><dt>âge</dt><dd>54</dd><dt>adresse</dt><dd>12 rue des Tilleuls, Montbéliard</dd><dt>opération</dt><dd>arthroscopie du genou, 08/10 09h00</dd><dt>salle</dt><dd>Bloc 1</dd></dl>
+          <div class="links"><button type="button" data-show="p:medecin">Voir sur le plan</button></div></div>
+        <div class="fmt"><h3>3. VPN site à site</h3><span class="route">srv-vpn 172.16.0.1 ⇄ srv-vpn partenaire 172.16.0.2, tunnel 10.99.0.0/30</span>
+          <dl class="msgx"><dt>Protocole</dt><dd>WireGuard (conseillé) ou IPsec, chiffré</dd><dt>Autorisé</dt><dd>10.1.30.0/24 → 10.0.30.10, port de la base</dd><dt>Droits</dt><dd>compte de base en lecture seule</dd><dt>Reste</dt><dd>refusé (règle 15)</dd></dl>
+          <div class="links"><button type="button" data-show="s:vpn">Voir sur le plan</button></div></div>
+        <div class="fmt"><h3>4. Sauvegarde et restauration</h3><span class="route">srv-secours 10.0.40.20 → srv-dir, srv-adm, srv-med (règle 7)</span>
+          <dl class="msgx"><dt>Transport</dt><dd>SSH (22) et rsync</dd><dt>Contenu</dt><dd>export des bases + fichiers des serveurs</dd><dt>Sens</dt><dd>le secours vient chercher les données</dd><dt>Fréquence</dt><dd>chaque jour (format à préciser)</dd></dl>
+          <div class="links"><button type="button" data-show="s:ransom">Voir sur le plan</button></div></div>
+        <div class="fmt"><h3>5. Badge du bloc</h3><span class="route">lecteur-badge 10.0.50.20 → srv-badge 10.0.50.10 → bdd-patients (règle 10)</span>
+          <dl class="msgx"><dt>Lecture</dt><dd>badge n° 0042 · porte bloc · 09h42</dd><dt>Question</dt><dd>opération en cours au bloc ?</dd><dt>Réponse</dt><dd>oui, arthroscopie 08h00 → 12h00</dd><dt>Décision</dt><dd>médical : ouvrir · entretien : refuser</dd></dl>
+          <div class="links"><button type="button" data-show="s:bloc">Voir sur le plan</button></div></div>
+        <div class="fmt"><h3>6. DNS</h3><span class="route">postes → dns 10.0.40.11, UDP et TCP 53 (règle 4)</span>
+          <dl class="msgx"><dt>Question</dt><dd>bdd-patients.hopital.lan ?</dd><dt>Réponse</dt><dd>10.0.30.10 (srv-med), TTL 30 s</dd><dt>Après bascule</dt><dd>10.0.40.20 (srv-secours)</dd></dl>
+          <div class="links"><button type="button" data-show="s:panne">Voir sur le plan</button></div></div>
+        <div class="fmt"><h3>7. Supervision</h3><span class="route">nagios 10.0.40.30 → équipements et serveurs (règle 6)</span>
+          <dl class="msgx"><dt>Contrôles</dt><dd>ping (ICMP), SNMP UDP 161, NRPE TCP 5666</dd><dt>Alerte</dt><dd>« srv-med ne répond plus »</dd><dt>Action</dt><dd>script de bascule DNS</dd></dl>
+          <div class="links"><button type="button" data-show="eq:nagios">Voir sur le plan</button></div></div>
+        <div class="fmt"><h3>8. Configurations</h3><span class="route">équipe → GitHub (fichiers texte versionnés)</span>
+          <dl class="msgx"><dt>Contenu</dt><dd>configurations des switches et du routeur, scripts, documents</dd><dt>Jamais</dt><dd>mots de passe RADIUS, VPN, bases</dd><dt>Usage</dt><dd>réinstaller un équipement à l’identique</dd></dl></div>
+      </div>
+    </div>
+    <div class="dbody" data-t="data" hidden>
+      <p class="note"><b>Statut :</b> modèle de données proposé, à valider avec le MCD et le MPD (tâche de Dylan). Champs tirés du sujet et des slides : nom, prénom, âge, adresse ; opérations et traitements passés, en cours et futurs ; lien avec une salle à porte sécurisée et le matériel de cette salle.</p>
+      <div class="grid2">
+        <div class="db-col">
+          <header><h3 style="color:var(--v30)">Base des patients</h3><span>bdd-patients · srv-med 10.0.30.10 · Docker</span></header>
+          <div class="ents">
+            <div class="ent" style="--ec:var(--v30)"><h4>PATIENT</h4><ul><li class="pk">id_patient</li><li>nom</li><li>prenom</li><li>date_naissance</li><li>adresse</li><li>telephone</li></ul></div>
+            <div class="ent" style="--ec:var(--v30)"><h4>OPERATION</h4><ul><li class="pk">id_operation</li><li class="fk">#id_patient</li><li class="fk">#id_salle</li><li>debut, fin</li><li>type_acte</li><li>chirurgien</li><li>statut : passée, en cours, prévue</li></ul></div>
+            <div class="ent" style="--ec:var(--v30)"><h4>SALLE</h4><ul><li class="pk">id_salle</li><li>nom</li><li>type</li></ul></div>
+            <div class="ent" style="--ec:var(--v30)"><h4>DOCUMENT_MEDICAL</h4><ul><li class="pk">id_document</li><li class="fk">#id_patient</li><li>type : biologie, imagerie, traitement, conclusion</li><li>date_doc</li><li>contenu</li></ul></div>
+            <div class="ent" style="--ec:var(--v30)"><h4>TRAITEMENT</h4><ul><li class="pk">id_traitement</li><li class="fk">#id_patient</li><li>medicament</li><li>posologie</li><li>debut, fin</li><li>statut : passé, en cours, futur</li></ul></div>
+            <div class="ent" style="--ec:var(--v30)"><h4>MATERIEL</h4><ul><li class="pk">id_materiel</li><li class="fk">#id_salle</li><li>nom, type</li><li>connecte (IoT) : oui / non</li><li>etat</li></ul></div>
+          </div>
+          <p class="rel">PATIENT 1 → 0,n OPERATION · OPERATION n → 1 SALLE · SALLE 1 → 0,n MATERIEL · PATIENT 1 → 0,n TRAITEMENT · PATIENT 1 → 0,n DOCUMENT_MEDICAL</p>
+        </div>
+        <div class="db-col">
+          <header><h3 style="color:var(--v20)">Base du personnel</h3><span>bdd-personnel · srv-adm 10.0.20.10 · Docker</span></header>
+          <div class="ents">
+            <div class="ent" style="--ec:var(--v20)"><h4>PERSONNEL</h4><ul><li class="pk">id_personnel</li><li>nom</li><li>prenom</li><li class="fk">#id_service</li><li>fonction</li><li>compte_8021x</li></ul></div>
+            <div class="ent" style="--ec:var(--v20)"><h4>SERVICE</h4><ul><li class="pk">id_service</li><li>libelle</li><li>vlan</li></ul></div>
+            <div class="ent" style="--ec:var(--v20)"><h4>BADGE</h4><ul><li class="pk">id_badge</li><li class="fk">#id_personnel</li><li>actif</li><li>date_expiration</li></ul></div>
+            <div class="ent" style="--ec:var(--v20)"><h4>ACCES_SALLE</h4><ul><li class="pk">id_acces</li><li class="fk">#id_badge</li><li>salle</li><li>horodatage</li><li>autorise</li></ul></div>
+          </div>
+        </div>
+      </div>
+      <h3>Exemple d’enregistrements (fictifs)</h3>
+      <div class="tblw"><table>
+        <thead><tr><th>id</th><th>Nom</th><th>Prénom</th><th>Âge</th><th>Adresse</th><th>Opération prévue</th><th>Salle</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Lambert</td><td>Claire</td><td>54</td><td>12 rue des Tilleuls, Montbéliard</td><td>08/10 09h00 · arthroscopie du genou</td><td>Bloc 1</td></tr>
+          <tr><td>2</td><td>Roussel</td><td>Hugo</td><td>37</td><td>4 place de la Gare, Belfort</td><td>08/10 14h00 · appendicectomie</td><td>Bloc 1</td></tr>
+          <tr><td>3</td><td>Faure</td><td>Inès</td><td>71</td><td>28 avenue Wilson, Audincourt</td><td>09/10 10h30 · prothèse de hanche</td><td>Bloc 2</td></tr>
+        </tbody>
+      </table></div>
+      <div class="grid2">
+        <div class="tblw"><table>
+          <thead><tr><th>Traitement</th><th>Patient</th><th>Période</th><th>Statut</th></tr></thead>
+          <tbody>
+            <tr><td>Paracétamol 1 g, 3 fois par jour</td><td>Lambert</td><td>08/10 → 15/10</td><td>futur</td></tr>
+            <tr><td>Amoxicilline 1 g, 2 fois par jour</td><td>Roussel</td><td>05/10 → 12/10</td><td>en cours</td></tr>
+            <tr><td>Anticoagulant préventif</td><td>Faure</td><td>01/09 → 30/09</td><td>passé</td></tr>
+          </tbody>
+        </table></div>
+        <div class="tblw"><table>
+          <thead><tr><th>Matériel</th><th>Salle</th><th>Connecté</th><th>État</th></tr></thead>
+          <tbody>
+            <tr><td>Table d’opération</td><td>Bloc 1</td><td>non</td><td>en service</td></tr>
+            <tr><td>Scialytique (éclairage)</td><td>Bloc 1</td><td>non</td><td>en service</td></tr>
+            <tr><td>Moniteur de surveillance</td><td>Bloc 1</td><td>oui</td><td>en service</td></tr>
+            <tr><td>Lecteur de badge de la porte</td><td>Bloc 1</td><td>oui (VLAN 50)</td><td>en service</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <h3>Où sont les données, qui y accède</h3>
+      <div class="tblw"><table>
+        <thead><tr><th>Données</th><th>Stockage</th><th>Qui y accède</th><th>Sauvegarde</th></tr></thead>
+        <tbody>
+          <tr><td>Dossiers médicaux (patients, opérations, analyses, imagerie)</td><td>bdd-patients sur srv-med</td><td>Personnel médical ; autre hôpital en lecture seule ; srv-badge pour le planning</td><td>srv-secours, chaque jour</td></tr>
+          <tr><td>Personnel, services, badges</td><td>bdd-personnel sur srv-adm</td><td>Administration, direction</td><td>srv-secours, chaque jour</td></tr>
+          <tr><td>Documents de direction</td><td>srv-dir</td><td>Direction</td><td>srv-secours, chaque jour</td></tr>
+          <tr><td>Comptes réseau</td><td>radius</td><td>Service informatique</td><td>configuration sur GitHub, secrets à part</td></tr>
+          <tr><td>Journaux (refus, passages de badge, alertes)</td><td>routeur, srv-badge, nagios</td><td>Service informatique</td><td>à préciser</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="dbody" data-t="fct" hidden>
+      <p class="lead">Les fonctions essentielles du système. Chacune peut être rejouée sur le plan.</p>
+      <ol class="fcts">
+        <li><span>Identifier chaque utilisateur en 802.1X (filaire et Wi-Fi) via RADIUS.</span><button type="button" class="see" data-show="s:dot1x">Voir</button></li>
+        <li><span>Cloisonner les 3 espaces : le routeur applique les droits de chaque profil.</span><button type="button" class="see" data-show="acc">Voir</button></li>
+        <li><span>Bloquer Internet dans les 2 sens.</span><button type="button" class="see" data-show="s:pirate">Voir</button></li>
+        <li><span>Consulter les données médicales de l’autre hôpital par le VPN (lecture seule).</span><button type="button" class="see" data-show="s:vpn">Voir</button></li>
+        <li><span>Sauvegarder et restaurer les données.</span><button type="button" class="see" data-show="s:ransom">Voir</button></li>
+        <li><span>Réinstaller un serveur de façon automatisée.</span><button type="button" class="see" data-show="s:panne">Voir</button></li>
+        <li><span>Basculer serveur principal ↔ secours en cas de défaillance.</span><button type="button" class="see" data-show="s:panne">Voir</button></li>
+        <li><span>Restreindre l’accès à la salle d’opération (badge, mode dégradé).</span><button type="button" class="see" data-show="s:bloc">Voir</button></li>
+        <li><span>Superviser l’infrastructure.</span><button type="button" class="see" data-show="eq:nagios">Voir</button></li>
+      </ol>
+    </div>
+  </div>
+</div>
+<div class="drawer" id="drawer-sec" hidden>
+  <div class="drawer-in" role="dialog" aria-label="Sécurité">
+    <div class="drawer-head">
+      <div class="row"><div><h2 style="font-size:1.25rem">Sécurité</h2><span class="lead" style="font-size:.8rem">Vulnérabilités et aléas, contre-mesures, tests</span></div><button class="btn dclose" type="button">Fermer ✕</button></div>
+      <div class="dtabs" role="tablist" data-doc="sec">
+        <button type="button" data-t="vuln" aria-selected="true">Vulnérabilités et contre-mesures</button>
+        <button type="button" data-t="dos" aria-selected="false">Déni de service</button>
+        <button type="button" data-t="pen" aria-selected="false">Tests d’intrusion</button>
+        <button type="button" data-t="proc" aria-selected="false">Réinstallation et quotas</button>
+      </div>
+    </div>
+    <div class="dbody" data-t="vuln">
+      <p class="note"><b>Statut au 07/10/2026 :</b> tous les tests sont à faire sur la maquette GNS3 (sprint 3). Envoyez-moi les résultats et je passerai les lignes en « Validé ».</p>
+      <div class="filters" id="vulnCat"><button type="button" aria-pressed="true" data-cat="Tout">Tout</button><button type="button" aria-pressed="false" data-cat="Réseau">Réseau</button><button type="button" aria-pressed="false" data-cat="Accès">Accès</button><button type="button" aria-pressed="false" data-cat="Physique">Physique</button><button type="button" aria-pressed="false" data-cat="Données">Données</button><button type="button" aria-pressed="false" data-cat="Panne">Panne</button></div>
+      <div class="tblw"><table id="vulnTbl">
+        <thead><tr><th>Type</th><th>Vulnérabilité ou aléa</th><th>Contre-mesure</th><th>Test de validation</th><th>Statut</th><th></th></tr></thead>
+        <tbody><tr data-cat="Réseau"><td><span class="chip">Réseau</span></td><td><b>Poste pirate branché sur une prise libre</b><br><small class="lead">Accès au réseau interne sans compte</small></td><td>802.1X + RADIUS sur toutes les prises, pas de VLAN invité, ports inutilisés éteints (VLAN 999)</td><td>Brancher un PC sans compte : il n’obtient aucune adresse</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:intrus">Voir</button></td></tr><tr data-cat="Réseau"><td><span class="chip">Réseau</span></td><td><b>Rançongiciel qui se propage d’un service à l’autre</b><br><small class="lead">Tous les serveurs chiffrés, soins arrêtés</small></td><td>Un VLAN par espace, règles d’accès sur le routeur, règle 15 qui refuse tout le reste</td><td>Depuis le VLAN 20, accès à srv-med et srv-dir refusé</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:ransom">Voir</button></td></tr><tr data-cat="Réseau"><td><span class="chip">Réseau</span></td><td><b>Attaque ou fuite de données par Internet</b><br><small class="lead">Vol de dossiers, prise de contrôle à distance</small></td><td>Aucun câble vers Internet, port Fa0/1 éteint, pas de route par défaut</td><td>Depuis un poste : ping et navigation vers Internet impossibles</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:pirate">Voir</button></td></tr><tr data-cat="Réseau"><td><span class="chip">Réseau</span></td><td><b>Déni de service interne (inondation de paquets, tempête de broadcast)</b><br><small class="lead">Serveurs ou réseau saturés</small></td><td>Règles d’accès, limitation du débit par prise (storm-control), spanning-tree, supervision Nagios, coupure de la prise fautive</td><td>Inonder un serveur depuis un poste (hping3) : débit limité, alerte Nagios</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:dos">Voir</button></td></tr><tr data-cat="Réseau"><td><span class="chip">Réseau</span></td><td><b>Hôpital partenaire compromis</b><br><small class="lead">Accès aux données hors médical</small></td><td>Règle 11 : seulement srv-med sur le port de la base, compte en lecture seule</td><td>Depuis 10.1.30.x : srv-adm refusé, écriture dans la base refusée</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:vpn">Voir</button></td></tr><tr data-cat="Réseau"><td><span class="chip">Réseau</span></td><td><b>Saut de VLAN (négociation de trunk, double étiquette)</b><br><small class="lead">Accès à un VLAN interdit</small></td><td>Trunks forcés sans négociation, prises en mode accès, VLAN natif 99 jamais donné aux postes</td><td>Tenter un trunk depuis un poste (yersinia) : refusé</td><td><span class="chip st-todo">À tester</span></td><td></td></tr><tr data-cat="Réseau"><td><span class="chip">Réseau</span></td><td><b>Faux serveur DHCP ou usurpation d’adresse</b><br><small class="lead">Trafic détourné vers un pirate</small></td><td>DHCP snooping sur les switches (proposition)</td><td>Lancer un faux DHCP sur un poste : ignoré</td><td><span class="chip st-todo">À tester</span></td><td></td></tr><tr data-cat="Accès"><td><span class="chip">Accès</span></td><td><b>Mot de passe Wi-Fi partagé ou cassé</b><br><small class="lead">Accès anonyme au réseau</small></td><td>WPA2-Entreprise : un compte par personne vérifié par RADIUS</td><td>Connexion Wi-Fi sans compte refusée, compte désactivé refusé</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="p:infirmier">Voir</button></td></tr><tr data-cat="Accès"><td><span class="chip">Accès</span></td><td><b>Vol d’un compte d’administration</b><br><small class="lead">Reconfiguration des équipements</small></td><td>Administration seulement depuis le VLAN 99, SSH, secrets hors de GitHub</td><td>SSH vers le routeur depuis le VLAN 20 : refusé</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="eq:r1">Voir</button></td></tr><tr data-cat="Physique"><td><span class="chip">Physique</span></td><td><b>Entrée non autorisée au bloc opératoire</b><br><small class="lead">Atteinte aux patients</small></td><td>Badge selon le rôle et le planning des opérations, journal des passages</td><td>Badge entretien pendant une opération : refusé</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:bloc">Voir</button></td></tr><tr data-cat="Physique"><td><span class="chip">Physique</span></td><td><b>Accès au local technique</b><br><small class="lead">Débranchement ou vol de matériel</small></td><td>Porte fermée à clé, pas de fenêtre, accès réservé au service informatique</td><td>Vérification visuelle</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="room:tech">Voir</button></td></tr><tr data-cat="Données"><td><span class="chip">Données</span></td><td><b>Lecture d’une base par un autre service</b><br><small class="lead">Fuite de dossiers médicaux</small></td><td>Règles d’accès + comptes de base par rôle</td><td>Connexion à la base patients depuis le VLAN 20 : refusée</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="p:secretaire">Voir</button></td></tr><tr data-cat="Données"><td><span class="chip">Données</span></td><td><b>Perte de données entre deux sauvegardes</b><br><small class="lead">Jusqu’à 24 h de saisies perdues</small></td><td>Sauvegarde chaque nuit ; réplication de la base proposée pour réduire la perte</td><td>Comparer la base restaurée à la base d’origine</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:quota">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Panne du serveur médical</b><br><small class="lead">Dossiers inaccessibles</small></td><td>Nagios + bascule de l’alias DNS vers srv-secours</td><td>Éteindre srv-med, mesurer le temps de reprise</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:panne">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Système d’un serveur effacé</b><br><small class="lead">Serveur hors service</small></td><td>Réinstallation automatisée + restauration</td><td>Réinstaller srv-med sur une machine vierge avec le script</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:reinstall">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Disque de sauvegarde plein</b><br><small class="lead">Sauvegardes qui échouent sans prévenir</small></td><td>Contrôle des quotas, rotation des copies, alerte au-delà de 80 %</td><td>Remplir le disque de test : alerte reçue</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:quota">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Panne d’un switch</b><br><small class="lead">Postes et serveurs du switch coupés</small></td><td>Configuration sur GitHub, switch de rechange, services communs sur SW2</td><td>Éteindre SW1, mesurer la remise en service</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:switch">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Panne du routeur</b><br><small class="lead">Plus de communication entre VLAN</small></td><td>Évolution proposée : second routeur en relais (HSRP)</td><td>Éteindre R1 sur la maquette : R2 prend le relais</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:routeur">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Panne d’une borne Wi-Fi</b><br><small class="lead">Tablettes déconnectées</small></td><td>Seconde borne sur l’autre switch (proposition)</td><td>Éteindre la borne n°1 : reconnexion sur la n°2</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:wifi">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Panne du serveur RADIUS</b><br><small class="lead">Plus aucune connexion 802.1X</small></td><td>Compte local de secours sur les équipements, supervision ; second RADIUS proposé</td><td>Arrêter FreeRADIUS : alerte, console des équipements accessible</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="eq:radius">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Panne du serveur des badges</b><br><small class="lead">Porte du bloc bloquée</small></td><td>Mode dégradé : liste locale des badges médicaux</td><td>Couper srv-badge : seuls les badges médicaux ouvrent</td><td><span class="chip st-todo">À tester</span></td><td><button type="button" class="see" data-show="s:bloc">Voir</button></td></tr><tr data-cat="Panne"><td><span class="chip">Panne</span></td><td><b>Coupure de courant</b><br><small class="lead">Arrêt de tous les services</small></td><td>Onduleur (hors matériel fourni), procédure de redémarrage documentée</td><td>Redémarrer dans l’ordre du manuel administrateur</td><td><span class="chip st-todo">À tester</span></td><td></td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="dbody" data-t="dos" hidden>
+      <p class="lead">Un déni de service cherche à rendre un service indisponible en le saturant. C’est un risque cité deux fois dans les consignes de la SAÉ (« panne, déni de service »).</p>
+      <div class="grid2">
+        <div class="fmt"><h3>Depuis Internet</h3><p>Impossible : aucun câble ne relie la clinique à Internet, le port Fa0/1 du routeur est éteint. L’attaque ne peut pas atteindre la clinique.</p></div>
+        <div class="fmt"><h3>Depuis l’autre hôpital</h3><p>Limité : seul le port de la base sur srv-med est ouvert (règle 11). En cas d’abus, on coupe le tunnel sur srv-vpn sans toucher au reste du réseau.</p></div>
+        <div class="fmt"><h3>Depuis un poste infecté</h3><p>Le cas le plus probable. Les règles d’accès empêchent le poste d’atteindre les autres VLAN. Dans son propre VLAN, la prise est limitée en débit (storm-control), Nagios détecte la surcharge et on coupe la prise.</p></div>
+        <div class="fmt"><h3>Boucle ou tempête réseau</h3><p>Un câble branché en boucle peut saturer un switch. Le spanning-tree coupe la boucle et le storm-control limite les broadcasts.</p></div>
+      </div>
+      <h3>Contre-mesures</h3>
+      <ul class="todo">
+        <li><b>Cloisonnement</b> : VLAN et règle 15, l’attaque reste dans un seul espace.</li>
+        <li><b>Limitation de débit par prise</b> (storm-control) sur les switches.</li>
+        <li><b>Supervision</b> : Nagios alerte dès qu’un serveur ralentit ou ne répond plus.</li>
+        <li><b>Isolement</b> : on éteint la prise fautive (shutdown), le poste est débranché et analysé.</li>
+        <li><b>Continuité</b> : si un serveur est hors service, bascule de son alias DNS vers srv-secours.</li>
+      </ul>
+      <div class="links"><button type="button" data-show="s:dos">Voir le scénario sur le plan</button></div>
+    </div>
+    <div class="dbody" data-t="pen" hidden>
+      <p class="lead">Série de tests d’attaque pour vérifier la protection. Ils se font <b>uniquement sur la maquette GNS3 ou le démonstrateur</b>, jamais sur le réseau de l’IUT.</p>
+      <div class="tblw"><table>
+        <thead><tr><th>N°</th><th>Test</th><th>Outil</th><th>Résultat attendu</th><th>Statut</th></tr></thead>
+        <tbody><tr><td>1</td><td><b>Scan des ports depuis un poste de chaque VLAN</b></td><td class="m">nmap</td><td>Seuls les services autorisés par les règles répondent</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>2</td><td><b>Branchement sans compte sur une prise</b></td><td class="m">PC Kali Linux</td><td>Pas d’adresse IP, aucune machine visible</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>3</td><td><b>Mots de passe 802.1X faux en série</b></td><td class="m">wpa_supplicant</td><td>Refus à chaque essai, tentatives journalisées par RADIUS</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>4</td><td><b>Négociation de trunk, double étiquette VLAN</b></td><td class="m">yersinia, scapy</td><td>Refusé, le poste reste dans son VLAN</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>5</td><td><b>Faux serveur DHCP</b></td><td class="m">dnsmasq sur un poste</td><td>Ignoré par les postes (si DHCP snooping)</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>6</td><td><b>Inondation d’un serveur</b></td><td class="m">hping3</td><td>Débit limité sur la prise, alerte Nagios, service maintenu</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>7</td><td><b>Accès à la base patients depuis le VLAN 20</b></td><td class="m">client mysql</td><td>Connexion refusée par le routeur</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>8</td><td><b>Écriture dans la base depuis l’autre hôpital</b></td><td class="m">client mysql</td><td>Refusé : compte en lecture seule</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>9</td><td><b>Sortie vers Internet depuis un poste</b></td><td class="m">ping, curl</td><td>Échec : aucune route</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>10</td><td><b>Connexion SSH au routeur depuis un poste</b></td><td class="m">ssh, hydra</td><td>Refusée par les règles, tentatives journalisées</td><td><span class="chip st-todo">À tester</span></td></tr><tr><td>11</td><td><b>Badge entretien pendant une opération</b></td><td class="m">lecteur de badge</td><td>Porte refusée, passage enregistré</td><td><span class="chip st-todo">À tester</span></td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="dbody" data-t="proc" hidden>
+      <div class="grid2">
+        <div class="fmt"><h3>Réinstallation automatisée d’un serveur</h3>
+          <ol class="fcts">
+            <li>Pendant la panne, l’alias DNS de la base pointe vers srv-secours : le service continue.</li>
+            <li>On réinstalle le système de base à partir d’une image ou d’un ISO Debian avec fichier de réponses : adresse fixe, compte d’administration, clé SSH de srv-secours.</li>
+            <li>Un script lancé depuis srv-secours installe Docker et pousse la configuration versionnée sur GitHub (copie locale, car il n’y a pas d’Internet).</li>
+            <li>Le script restaure les données de la dernière sauvegarde et redémarre la base.</li>
+            <li>On teste depuis un poste du bon VLAN, puis l’alias DNS revient vers le serveur réinstallé.</li>
+          </ol>
+          <div class="links"><button type="button" data-show="s:reinstall">Voir sur le plan</button></div></div>
+        <div class="fmt"><h3>Sauvegardes et quotas</h3>
+          <ol class="fcts">
+            <li>Chaque nuit à 02h00, srv-secours vient copier les données de srv-dir, srv-adm et srv-med (règle 7).</li>
+            <li>Après la copie, un script vérifie l’espace disque et supprime les copies les plus anciennes (proposition : on garde les 7 derniers jours).</li>
+            <li>Au-delà de 80 % d’occupation, Nagios alerte le service informatique avant que les sauvegardes échouent.</li>
+            <li>Sur les serveurs de fichiers, un quota par utilisateur empêche un seul compte de remplir le disque.</li>
+            <li>Une fois par semaine, on teste une restauration pour prouver que les sauvegardes sont utilisables.</li>
+          </ol>
+          <div class="links"><button type="button" data-show="s:quota">Voir sur le plan</button></div></div>
+      </div>
+      <p class="note"><b>À fixer par l’équipe :</b> heure des sauvegardes, durée de conservation, taille des quotas et format des exports. Le plan d’adressage ne les précise pas.</p>
+    </div>
+  </div>
+</div>
+<div class="lightbox" id="lb" hidden><img id="lbImg" alt=""></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const REDUCE=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const NS="http://www.w3.org/2000/svg";
+function el(tag,a,parent,text){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const svg=$("#plan");
+const L={};
+["outside","floor","cov","tray","cables","furn","walls","amb","labels","eq","people","fx"].forEach(k=>{L[k]=el("g",{class:"L-"+k},svg);if(!["floor","eq","people"].includes(k))L[k].style.pointerEvents="none";});
+
+/* ===================== PIÈCES ===================== */
+const ROOMS={
+  dir:{x:60,y:110,w:290,h:280,name:"Direction",vlan:10,who:"La directrice et son adjoint.",access:["Données de la direction","Données de l’administration"],
+    text:"Bureau de la direction. Ses postes sont placés dans le réseau Direction (VLAN 10), le seul qui peut consulter deux espaces : le sien et celui de l’administration."},
+  adm:{x:350,y:110,w:300,h:280,name:"Administration",vlan:20,who:"Secrétariat, comptabilité, ressources humaines.",access:["Données de l’administration"],
+    text:"Bureaux administratifs, réseau Administration (VLAN 20). Ils ne voient que leurs propres données : ni la direction, ni les dossiers médicaux. La borne Wi-Fi n°2 y est installée, de l’autre côté du couloir par rapport à la n°1."},
+  tech:{x:650,y:110,w:230,h:280,name:"Local technique",vlan:40,who:"Service informatique uniquement (porte fermée à clé).",access:["Administration du réseau"],
+    text:"Le cœur du réseau : tout le trafic passe par ici. On y trouve le routeur (et le routeur de secours ajouté sur la maquette), les deux switches, le serveur de chaque espace, et les services communs : RADIUS, DNS, secours et sauvegardes, supervision, badges et VPN. Pas de fenêtre, accès restreint."},
+  ent:{x:880,y:110,w:260,h:280,name:"Vestiaires · entretien",vlan:null,who:"Personnel d’entretien.",access:["Aucun accès informatique","Badge : bloc opératoire hors opérations"],
+    text:"Le personnel d’entretien n’a pas de compte informatique. Son badge lui ouvre le bloc opératoire, mais seulement en dehors des opérations."},
+  acc:{x:60,y:470,w:240,h:300,name:"Accueil",vlan:20,who:"Agent d’accueil et patients en salle d’attente.",access:["Données de l’administration"],
+    text:"Accueil des patients, rattaché à l’administration (VLAN 20). La salle d’attente est ouverte au public : une prise réseau libre ne donne accès à rien sans identifiant (802.1X)."},
+  cons:{x:300,y:470,w:260,h:300,name:"Consultations",vlan:30,who:"Médecins.",access:["Dossiers médicaux","Dossiers de l’hôpital partenaire (VPN)"],
+    text:"Cabinet de consultation, réseau Médical (VLAN 30) : dossiers patients, analyses, imagerie, traitements. C’est aussi d’ici qu’on consulte les dossiers de l’autre hôpital."},
+  soins:{x:560,y:470,w:260,h:300,name:"Salle de soins",vlan:30,who:"Infirmiers, sur tablettes Wi-Fi.",access:["Dossiers médicaux"],
+    text:"Salle de soins équipée d’une borne Wi-Fi. Chaque infirmier se connecte avec son propre identifiant (WPA2-Entreprise, géré par le firmware DD-WRT) : pas de mot de passe Wi-Fi partagé. Une seconde borne, de l’autre côté du couloir, prend le relais si celle-ci tombe en panne."},
+  bloc:{x:820,y:470,w:320,h:300,name:"Bloc opératoire",vlan:30,who:"Équipe médicale pendant les opérations, entretien en dehors.",access:["Dossiers médicaux (poste d’anesthésie)","Porte à badge"],
+    text:"Accès physique contrôlé par badge selon le planning des opérations : le lecteur (VLAN 50) interroge le serveur des badges. Le poste d’anesthésie est sur le réseau médical."}
+};
+const area=r=>Math.round(r.w*r.h/1600);
+el("rect",{x:60,y:390,width:1080,height:80,class:"corr"},L.floor);
+for(const id in ROOMS){const r=ROOMS[id];r.id=id;
+  r.el=el("rect",{x:r.x,y:r.y,width:r.w,height:r.h,class:"room",tabindex:0,role:"button","aria-label":r.name},L.floor);
+  r.el.addEventListener("click",()=>showRoom(id));
+  r.el.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();showRoom(id);}});
+  el("text",{x:r.x+16,y:r.y+28,class:"rlabel"},L.labels,r.name);
+  el("text",{x:r.x+16,y:r.y+43,class:"rarea"},L.labels,area(r)+" m²");
+  if(r.vlan)el("text",{x:r.x+16,y:r.y+58,class:"rvlan",style:`fill:var(--v${r.vlan})`},L.labels,id==="tech"?"VLAN 40 · 50 · 60 · 99":`VLAN ${r.vlan} · 10.0.${r.vlan}.0/24`);
+}
+el("text",{x:330,y:462,class:"rlabel",style:"fill:var(--muted);font-size:10.5px"},L.labels,"Couloir");
+function setNetTint(on){for(const id in ROOMS){const r=ROOMS[id];r.el.style.fill=on&&r.vlan?`color-mix(in srgb, var(--v${r.vlan}) 13%, var(--floor))`:"";}}
+
+/* ===================== MURS, PORTES, FENÊTRES ===================== */
+let wallN=0;
+const W=(x1,y1,x2,y2)=>el("line",{x1,y1,x2,y2,class:"wall",pathLength:1,style:`animation-delay:${(wallN++*0.03).toFixed(2)}s`},L.walls);
+function wallH(y,x1,x2,gaps){let x=x1;(gaps||[]).forEach(([a,b])=>{W(x,y,a,y);x=b;});W(x,y,x2,y);}
+function wallV(x,y1,y2,gaps){let y=y1;(gaps||[]).forEach(([a,b])=>{W(x,y,x,a);y=b;});W(x,y,x,y2);}
+function doorH(y,a,b,dir){const w=b-a;el("path",{d:`M${a} ${y}L${a} ${y+dir*w}A${w} ${w} 0 0 ${dir>0?0:1} ${b} ${y}`,class:"door"},L.walls);}
+const TOPD=[[295,335],[580,620],[740,780],[960,1000]],BOTD=[[250,290],[500,540],[760,800],[1070,1120]];
+wallH(110,60,1140);wallH(770,60,1140,[[140,200]]);wallV(60,110,770);wallV(1140,110,770,[[405,455]]);
+wallH(390,60,1140,TOPD);wallH(470,60,1140,BOTD);
+[350,650,880].forEach(x=>wallV(x,110,390));[300,560,820].forEach(x=>wallV(x,470,770));
+TOPD.forEach(([a,b])=>doorH(390,a,b,-1));BOTD.forEach(([a,b])=>doorH(470,a,b,1));doorH(770,140,200,-1);
+[[110,190],[230,310],[400,480],[530,610],[930,1010],[1050,1120]].forEach(([a,b])=>{el("rect",{x:a,y:106,width:b-a,height:8,class:"win"},L.walls);el("line",{x1:a,y1:110,x2:b,y2:110,style:"stroke:var(--wall);stroke-width:1"},L.walls);});
+[[220,290],[380,470],[620,720],[900,980],[1040,1110]].forEach(([a,b])=>{el("rect",{x:a,y:766,width:b-a,height:8,class:"win"},L.walls);el("line",{x1:a,y1:770,x2:b,y2:770,style:"stroke:var(--wall);stroke-width:1"},L.walls);});
+el("text",{x:170,y:795,class:"rarea","text-anchor":"middle"},L.labels,"Entrée");
+el("text",{x:1150,y:420,class:"rarea"},L.labels,"Sortie");
+el("text",{x:1150,y:432,class:"rarea"},L.labels,"secours");
+
+/* ===================== MOBILIER ===================== */
+const F=L.furn;
+const R=(x,y,w,h,rx)=>el("rect",{x,y,width:w,height:h,rx:rx||2,class:"furn"},F);
+const C=(cx,cy,r)=>el("circle",{cx,cy,r,class:"furn"},F);
+// direction
+R(105,193,80,36);R(225,193,80,36);C(145,248,9);C(265,248,9);
+el("ellipse",{cx:205,cy:345,rx:70,ry:20,class:"furn"},F);[[150,318],[205,316],[260,318],[150,372],[205,374],[260,372]].forEach(p=>C(p[0],p[1],7));
+// administration
+R(380,193,70,36);R(470,193,70,36);R(560,193,70,36);C(415,248,9);C(505,248,9);C(595,248,9);R(372,342,150,30);
+// local technique
+R(664,178,116,94,3);el("rect",{x:782,y:174,width:92,height:206,rx:3,class:"furn",style:"stroke-dasharray:4 3"},F);R(672,334,56,26);
+// entretien
+for(let i=0;i<7;i++)R(1100,178+i*28,34,24,1);R(925,236,140,16);R(1020,320,46,34,4);
+// accueil
+el("path",{d:"M150 596 L150 566 Q220 548 290 566 L290 596 Z",class:"furn"},F);
+[630,656,682,708,734].forEach(y=>R(68,y,18,18,3));C(110,750,10);
+// consultations
+R(330,555,90,36);C(375,608,9);R(440,680,100,42,10);
+// soins
+R(590,600,44,36,3);[585,655,725].forEach(x=>{R(x,662,48,94,6);R(x+8,668,32,14,4);});
+// bloc
+R(955,598,50,124,8);el("circle",{cx:980,cy:660,r:52,class:"furn-l",style:"stroke-dasharray:5 5"},F);R(848,615,50,34,3);R(1080,700,44,50,4);
+
+/* ===================== EXTÉRIEUR ===================== */
+const O=L.outside;
+el("path",{d:"M195 86 h96 a20 20 0 0 0 0-40 a28 28 0 0 0-52-12 a22 22 0 0 0-42 12 a20 20 0 0 0-2 40z",class:"ico",style:"stroke:var(--bad);stroke-dasharray:5 4"},O);
+el("text",{x:243,y:64,"text-anchor":"middle",class:"outlbl"},O,"Internet");
+el("text",{x:243,y:77,"text-anchor":"middle",class:"outsub",style:"fill:var(--bad)"},O,"bloqué");
+el("rect",{x:938,y:26,width:150,height:70,rx:4,class:"ico",style:"stroke:var(--accent)"},O);
+el("path",{d:"M955 46h12M961 40v12",class:"ico-l",style:"stroke:var(--accent);stroke-width:2.5"},O);
+el("text",{x:1018,y:51,"text-anchor":"middle",class:"outlbl"},O,"Hôpital");
+el("text",{x:1018,y:65,"text-anchor":"middle",class:"outlbl"},O,"partenaire");
+el("text",{x:1018,y:84,"text-anchor":"middle",class:"outsub"},O,"172.16.30.0/24");
+el("path",{d:"M311 64 H470 V106",class:"blocked-l"},O);
+el("path",{d:"M865 343 H872 V84 H938",class:"tunnel"},O);el("path",{d:"M865 343 H872 V84 H938",class:"tunnel-l"},O);
+el("text",{x:812,y:100,"text-anchor":"middle",class:"outsub",style:"fill:var(--accent);font-weight:600"},O,"tunnel VPN (WireGuard)");
+const bar=el("g",{class:"barrier"},O);el("circle",{cx:470,cy:86,r:13,style:"fill:var(--surface);stroke:var(--bad);stroke-width:2.5"},bar);
+el("path",{d:"M463 79l14 14M477 79l-14 14",class:"xm",style:"stroke-width:3"},bar);
+el("text",{x:390,y:56,"text-anchor":"middle",class:"outsub",style:"fill:var(--bad)"},O,"aucun câble vers Internet");
+const na=el("g",{transform:"translate(1166,44)"},O);el("path",{d:"M0 -18 L8 10 L0 4 L-8 10Z",style:"fill:var(--ink)"},na);el("text",{x:0,y:26,"text-anchor":"middle",class:"outsub",style:"font-weight:700;fill:var(--ink)"},na,"N");
+const sc=el("g",{},O);el("path",{d:"M900 790 h200 M900 785 v10 M1000 787 v6 M1100 785 v10",style:"stroke:var(--muted);stroke-width:1.5;fill:none"},sc);
+el("text",{x:900,y:803,"text-anchor":"middle",class:"outsub"},sc,"0");el("text",{x:1100,y:803,"text-anchor":"middle",class:"outsub"},sc,"5 m");
+el("path",{d:"M100 430 H1100",class:"tray"},L.tray);
+
+/* ===================== ÉQUIPEMENTS ===================== */
+const EQ={
+  r1:{x:690,y:200,k:"router",room:"tech",lab:"R1 · actif",dns:"rtr",name:"Routeur Cisco 1841 (R1)",ip:"10.0.99.1 · passerelle .1 de chaque VLAN",
+    text:"Le gardien du réseau. Un seul câble le relie au switch n°1 (« router-on-a-stick ») : ce câble transporte tous les VLAN et le routeur a une sous-interface par VLAN (Fa0/0.10 à Fa0/0.99). Il distribue les adresses des postes (DHCP) et applique les 15 règles d’accès. Son second port reste éteint : aucune route vers Internet."},
+  r2:{x:750,y:200,k:"router",room:"tech",lab:"R2 · secours",name:"Routeur de secours R2 (évolution)",ip:"hors plan d’adressage · proposition HSRP",
+    text:"Ajouté sur la maquette GNS3 pour montrer la redondance : il ne fait pas partie du plan d’adressage, et le sujet ne fournit qu’un routeur. Avec le protocole HSRP, la passerelle .1 de chaque VLAN deviendrait une adresse virtuelle partagée (R1 en .2, R2 en .3). R1 envoie un message « je suis vivant » toutes les 3 secondes ; si R2 n’en reçoit plus, il reprend la passerelle et le trafic repart par lui."},
+  sw1:{x:690,y:250,k:"switch",room:"tech",lab:"SW1",dns:"sw1",name:"Switch Cisco Catalyst n°1",ip:"10.0.99.11 (VLAN 99)",
+    text:"Relié au routeur par un trunk qui porte tous les VLAN. Il branche les serveurs direction, administration et médical, la borne Wi-Fi et des postes. Chaque prise de poste reste fermée tant que l’utilisateur ne s’est pas identifié (802.1X)."},
+  sw2:{x:750,y:250,k:"switch",room:"tech",lab:"SW2",dns:"sw2",name:"Switch Cisco Catalyst n°2",ip:"10.0.99.12 (VLAN 99)",
+    text:"Relié au switch n°1 par un trunk. Il branche les services communs (RADIUS, DNS, secours, Nagios), les badges, le serveur VPN et des postes. Sur la maquette, il est aussi relié directement aux deux routeurs pour la redondance."},
+  "srv-dir":{x:805,y:196,k:"server",room:"tech",vlan:10,sw:"sw1",lab:"Direction",dns:"srv-dir",name:"Serveur de la direction",ip:"10.0.10.10",
+    text:"Documents de la direction. Visible uniquement depuis le réseau Direction (VLAN 10)."},
+  "srv-adm":{x:852,y:196,k:"server",room:"tech",vlan:20,sw:"sw1",lab:"Admin.",dns:"srv-adm",name:"Serveur administration + base du personnel",ip:"10.0.20.10",
+    text:"Données de l’administration et base du personnel (employés, services, badges), dans Docker. Alias DNS : bdd-personnel.hopital.lan."},
+  "srv-med":{x:805,y:245,k:"server",room:"tech",vlan:30,sw:"sw1",lab:"Médical",dns:"srv-med",name:"Serveur médical + base des patients",ip:"10.0.30.10",
+    text:"Base des patients dans Docker : identité, opérations prévues, salles, analyses, imagerie, traitements. Alias DNS : bdd-patients.hopital.lan. Seul serveur que l’autre hôpital peut consulter, en lecture seule."},
+  radius:{x:852,y:245,k:"server",room:"tech",vlan:40,sw:"sw2",lab:"RADIUS",dns:"radius",name:"Serveur RADIUS (FreeRADIUS)",ip:"10.0.40.10 · UDP 1812/1813",
+    text:"Le contrôle d’identité. Les switches et la borne Wi-Fi lui demandent si un utilisateur existe et dans quel VLAN le placer : groupe direction → 10, administration → 20, medical → 30."},
+  dns:{x:805,y:294,k:"server",room:"tech",vlan:40,sw:"sw2",lab:"DNS",dns:"dns",name:"Serveur DNS",ip:"10.0.40.11",
+    text:"Donne un nom à chaque machine de la zone hopital.lan. Les applications utilisent des alias comme bdd-patients.hopital.lan : pour basculer vers le serveur de secours, il suffit de changer l’alias."},
+  secours:{x:852,y:294,k:"server",room:"tech",vlan:40,sw:"sw2",lab:"Secours",dns:"srv-secours",name:"Serveur de secours + sauvegardes",ip:"10.0.40.20",
+    text:"Il vient copier chaque jour les données des serveurs direction, administration et médical (SSH, rsync, export des bases). Les postes ne peuvent pas écrire dessus. Si un serveur principal tombe, l’alias DNS de sa base pointe vers lui et il prend le relais."},
+  "srv-badge":{x:805,y:343,k:"server",room:"tech",vlan:50,sw:"sw2",lab:"Badges",dns:"srv-badge",name:"Serveur des badges",ip:"10.0.50.10",
+    text:"Décide si un badge ouvre la porte du bloc. Il demande à la base des patients si une opération est en cours (règle 10). Code à développer."},
+  "srv-vpn":{x:852,y:343,k:"server",room:"tech",vlan:60,sw:"sw2",lab:"VPN",dns:"srv-vpn",name:"Serveur VPN (WireGuard)",ip:"eth0 10.0.60.10 · eth1 172.16.0.1",
+    text:"Extrémité du tunnel chiffré vers l’autre hôpital. Sa seconde carte réseau (eth1) est reliée par un câble direct au serveur VPN du partenaire. Le routeur lui envoie le trafic destiné au réseau médical distant 10.1.30.0/24."},
+  nagios:{x:700,y:344,k:"pc",room:"tech",vlan:40,sw:"sw2",lab:"Supervision",dns:"nagios",name:"Supervision (Nagios)",ip:"10.0.40.30",
+    text:"Surveille en permanence les équipements et les serveurs (ping, SNMP, NRPE) et alerte le service informatique dès qu’un élément ne répond plus."},
+  "pc-dir1":{x:145,y:209,k:"pc",room:"dir",vlan:10,sw:"sw1",name:"Poste de la direction",ip:"DHCP 10.0.10.100 à .200",text:"Branché sur une prise protégée par 802.1X. Une fois la directrice identifiée (groupe direction), le poste rejoint le VLAN 10 et reçoit son adresse."},
+  "pc-dir2":{x:265,y:209,k:"pc",room:"dir",vlan:10,sw:"sw1",name:"Poste de la direction",ip:"DHCP 10.0.10.100 à .200",text:"Poste de l’adjoint de direction, VLAN 10."},
+  "pc-adm1":{x:415,y:209,k:"pc",room:"adm",vlan:20,sw:"sw1",name:"Poste administratif",ip:"DHCP 10.0.20.100 à .200",text:"Poste du secrétariat, VLAN 20."},
+  "pc-adm2":{x:505,y:209,k:"pc",room:"adm",vlan:20,sw:"sw1",name:"Poste administratif",ip:"DHCP 10.0.20.100 à .200",text:"Poste de la comptabilité, VLAN 20."},
+  "pc-adm3":{x:595,y:209,k:"pc",room:"adm",vlan:20,sw:"sw1",name:"Poste administratif",ip:"DHCP 10.0.20.100 à .200",text:"Poste des ressources humaines, VLAN 20."},
+  "pc-acc":{x:220,y:572,k:"pc",room:"acc",vlan:20,sw:"sw1",name:"Poste d’accueil",ip:"DHCP 10.0.20.100 à .200",text:"Poste de l’accueil, rattaché à l’administration (VLAN 20)."},
+  "pc-cons":{x:375,y:571,k:"pc",room:"cons",vlan:30,sw:"sw2",name:"Poste du médecin",ip:"DHCP 10.0.30.100 à .200",text:"Poste de consultation, VLAN 30 : base des patients et consultation des dossiers de l’hôpital partenaire."},
+  ap:{x:700,y:560,k:"ap",room:"soins",vlan:99,sw:"sw1",lab:"Borne Wi-Fi 1",dns:"ap-wifi",name:"Borne Wi-Fi n°1 (salle de soins)",ip:"10.0.99.21 (VLAN 99)",
+    text:"Un SSID « HOPITAL » en WPA2-Entreprise, relié au serveur RADIUS : chaque personne se connecte avec son propre compte. Branchée sur SW1. La borne n°2, de l’autre côté du couloir, diffuse le même réseau : si l’une tombe, les appareils passent sur l’autre. Linksys WRT54G sous firmware DD-WRT, qui gère le WPA2-Entreprise. À tester : la séparation des VLAN, avec un SSID par VLAN ou tout le Wi-Fi dans le VLAN 30."},
+  ap2:{x:612,y:320,k:"ap",room:"adm",vlan:99,sw:"sw2",lab:"Borne Wi-Fi 2",dns:"ap-wifi2",name:"Borne Wi-Fi n°2 (redondance)",ip:"10.0.99.22 (VLAN 99) · proposition, à ajouter au plan",
+    text:"Seconde borne Linksys WRT54G sous DD-WRT, de l’autre côté du couloir. Elle diffuse le même réseau « HOPITAL » et interroge le même serveur RADIUS. Les zones des deux bornes se recouvrent : si une borne tombe en panne, les tablettes se reconnectent sur l’autre. Elle est branchée sur SW2 (la n°1 sur SW1) : même si un switch tombe, une borne reste en service."},
+  tablet:{x:612,y:618,k:"tablet",room:"soins",vlan:30,via:"ap",name:"Tablette des infirmiers",ip:"DHCP 10.0.30.100 à .200 (Wi-Fi)",text:"Tablette connectée au Wi-Fi avec le compte personnel de l’infirmier (groupe medical)."},
+  "pc-bloc":{x:873,y:632,k:"pc",room:"bloc",vlan:30,sw:"sw2",name:"Poste d’anesthésie",ip:"DHCP 10.0.30.100 à .200",text:"Poste du bloc opératoire, VLAN 30 : dossier du patient opéré."},
+  badge:{x:1045,y:452,k:"badge",room:"bloc",vlan:50,sw:"sw2",dns:"lecteur-badge",name:"Lecteur de badge du bloc",ip:"10.0.50.20",
+    text:"Lit le badge et demande au serveur des badges s’il faut ouvrir : personnel médical pendant les opérations, entretien en dehors. Chaque passage est enregistré."},
+  intrus:{x:120,y:700,k:"laptop",room:"acc",sw:"sw1",hidden:true,name:"Ordinateur d’un intrus",ip:"aucune",text:"Un portable branché sur une prise de la salle d’attente."}
+};
+function icon(k,g,v){
+  const strip=v?`var(--v${v})`:null;
+  if(k==="server"){el("rect",{x:-13,y:-16,width:26,height:32,rx:3,class:"ico"},g);el("path",{d:"M-13 -5h26M-13 6h26",class:"ico-l"},g);if(strip)el("rect",{x:-13,y:-16,width:26,height:5,rx:2,style:`fill:${strip}`},g);el("circle",{cx:7,cy:11,r:1.8,class:"led",style:`fill:var(--ok);animation-delay:${(Math.random()*1.6).toFixed(2)}s;animation-duration:${(1+Math.random()*1.4).toFixed(2)}s`},g);el("circle",{cx:2,cy:11,r:1.4,style:"fill:var(--ok);opacity:.5"},g);}
+  else if(k==="router"){el("rect",{x:-22,y:-9,width:44,height:18,rx:8,class:"ico"},g);el("path",{d:"M-10 0h20M5 -4l5 4-5 4M-5 -4l-5 4 5 4",class:"ico-l"},g);}
+  else if(k==="switch"){el("rect",{x:-22,y:-8,width:44,height:16,rx:2,class:"ico"},g);for(let i=0;i<6;i++)el("rect",{x:-17+i*6,y:-2,width:4,height:4,style:"fill:var(--ink)"},g);}
+  else if(k==="pc"){el("rect",{x:-12,y:-10,width:24,height:16,rx:2,class:"ico"},g);el("path",{d:"M-6 11h12M0 6v5",class:"ico-l"},g);if(strip)el("rect",{x:-12,y:-10,width:24,height:4,rx:1.5,style:`fill:${strip}`},g);}
+  else if(k==="laptop"){el("rect",{x:-11,y:-9,width:22,height:13,rx:2,class:"ico",style:"stroke:var(--bad)"},g);el("path",{d:"M-15 7h30",class:"ico-l",style:"stroke:var(--bad)"},g);}
+  else if(k==="tablet"){el("rect",{x:-8,y:-11,width:16,height:22,rx:3,class:"ico"},g);if(strip)el("rect",{x:-8,y:-11,width:16,height:4,rx:2,style:`fill:${strip}`},g);}
+  else if(k==="ap"){el("circle",{cx:0,cy:0,r:7,class:"ico"},g);el("path",{d:"M-10 -9a14 14 0 0 1 20 0",class:"ico-l wave"},g);el("path",{d:"M-15 -14a21 21 0 0 1 30 0",class:"ico-l wave",style:"animation-delay:.35s"},g);}
+  else if(k==="badge"){el("rect",{x:-7,y:-10,width:14,height:20,rx:2,class:"ico"},g);el("circle",{cx:0,cy:-3,r:3,class:"lamp",style:"fill:var(--muted)"},g);el("path",{d:"M-4 5h8",class:"ico-l"},g);}
+}
+const clip=el("clipPath",{id:"bldg"},svg);el("rect",{x:60,y:110,width:1080,height:660},clip);
+L.cov.setAttribute("clip-path","url(#bldg)");
+const COVR=260;
+function drawCov(){["ap","ap2"].forEach((id,k)=>{const e=EQ[id];el("circle",{cx:e.x,cy:e.y,r:COVR,class:"cov","data-cov":id},L.cov);el("circle",{cx:e.x,cy:e.y,r:COVR,class:"cov-wave","data-cov":id,style:`animation-delay:${k*1.6}s`},L.cov);});}
+let eqN=0;
+for(const id in EQ){const e=EQ[id];e.id=id;
+  const g=el("g",{class:"eq",transform:`translate(${e.x},${e.y})`,tabindex:0,role:"button","aria-label":e.name},L.eq);
+  el("circle",{r:22,class:"ring"},g);el("rect",{x:-22,y:-20,width:44,height:40,class:"hit"},g);
+  const ig=el("g",{class:"pop",style:`animation-delay:${(0.75+eqN++*0.04).toFixed(2)}s`},g);
+  icon(e.k,ig,e.vlan);
+  if(e.lab)el("text",{x:0,y:e.k==="ap"?24:(e.k==="router"||e.k==="switch")?21:29,"text-anchor":"middle",class:"elabel"},ig,e.lab);
+  g.addEventListener("click",ev=>{ev.stopPropagation();showEq(id);});
+  g.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();showEq(id);}});
+  if(e.hidden)g.style.display="none";
+  e.g=g;
+}
+const pt=id=>[EQ[id].x,EQ[id].y];
+let CUR_AP="ap";
+const covOff=id=>L.cov.querySelectorAll(`[data-cov="${id}"]`).forEach(c=>c.classList.add("off"));
+function toSwitchPts(id){
+  const e=EQ[id];
+  if(e.via){const a=EQ[CUR_AP],wy=a.y<390?390:470;return [[e.x,e.y],[a.x,a.y],[a.x,wy],[a.x,430],[760,430],[760,392],pt(a.sw)];}
+  if(e.room==="tech")return [[e.x,e.y],pt(e.sw)];
+  if(e.y>390&&e.y<470)return [[e.x,e.y],[e.x,430],[760,430],[760,392],pt(e.sw)];
+  const wy=e.y<390?390:470;
+  return [[e.x,e.y],[e.x,wy],[e.x,430],[760,430],[760,392],pt(e.sw)];
+}
+/* câble direct eth1 du serveur VPN vers le serveur VPN de l’autre hôpital */
+const TUNPTS=[[852,343],[872,343],[872,84],[938,84],[1013,62]];
+for(const id in EQ){const e=EQ[id];if(!e.sw||e.hidden||e.via)continue;
+  el("polyline",{points:toSwitchPts(id).map(p=>p.join(",")).join(" "),class:"cable",pathLength:1,style:`stroke:var(--v${e.vlan||99})`},L.cables);}
+el("polyline",{points:"700,560 612,618",class:"cable wifi",style:"stroke:var(--v30);stroke-width:2.5"},L.cables);
+[[690,209,690,242],[750,209,750,242],[702,208,738,243],[738,208,702,243],[712,250,728,250]].forEach(([a,b,c,d])=>el("line",{x1:a,y1:b,x2:c,y2:d,class:"core"},L.cables));
+el("line",{x1:712,y1:200,x2:728,y2:200,class:"core hsrp"},L.cables);
+/* Réseau vivant : petits paquets qui circulent en permanence sur les câbles */
+if(!REDUCE){
+  const routes=[];
+  for(const id in EQ){const e=EQ[id];if(!e.sw||e.hidden)continue;routes.push([toSwitchPts(id),e.vlan||99]);}
+  ["srv-dir","srv-adm","srv-med"].forEach(id=>routes.push([[pt(id),pt(EQ[id].sw),[690,200]],EQ[id].vlan]));
+  routes.push([TUNPTS,60]);
+  routes.forEach(([pts,v],i)=>{
+    const d="M"+pts.map(p=>p.join(" ")).join(" L");
+    let len=0;for(let k=1;k<pts.length;k++)len+=Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]);
+    const dur=Math.max(2.2,len/85);
+    [0,1].forEach(rev=>{
+      const c=el("circle",{r:3.2,class:"amb-dot",style:`--c:var(--v${v})`},L.amb);
+      el("animateMotion",{dur:dur.toFixed(2)+"s",repeatCount:"indefinite",path:d,begin:(-Math.random()*dur).toFixed(2)+"s",calcMode:"linear",keyPoints:rev?"1;0":"0;1",keyTimes:"0;1"},c);
+    });
+  });
+  /* battement HSRP : R1 dit « je suis vivant » à R2 toutes les 3 secondes */
+  const hb=el("circle",{r:3,class:"hb-dot"},L.amb);
+  el("animateMotion",{dur:"3s",repeatCount:"indefinite",path:"M712 200 L728 200",keyPoints:"0;1;1",keyTimes:"0;0.25;1",calcMode:"linear"},hb);
+}
+
+/* ===================== PERSONNES ===================== */
+const PEOPLE={
+  directrice:{x:95,y:262,name:"La directrice",short:"Directrice",col:"var(--v10)",dev:"pc-dir1",room:"dir"},
+  secretaire:{x:450,y:296,name:"Une secrétaire",short:"Secrétaire",col:"var(--v20)",dev:"pc-adm2",room:"adm"},
+  accueil:{x:220,y:618,name:"L’agent d’accueil",short:"Accueil",col:"var(--v20)",dev:"pc-acc",room:"acc"},
+  medecin:{x:445,y:618,name:"Un médecin",short:"Médecin",col:"var(--v30)",dev:"pc-cons",room:"cons"},
+  infirmier:{x:690,y:628,name:"Un infirmier (Wi-Fi)",short:"Infirmier",col:"var(--v30)",dev:"tablet",room:"soins"},
+  agent:{x:975,y:296,name:"L’agent d’entretien",short:"Entretien",col:"var(--muted)",dev:null,room:"ent"},
+  partenaire:{name:"L’autre hôpital",ext:true},
+  pirate:{name:"Un pirate sur Internet",ext:true},
+  intrus:{name:"Un intrus en salle d’attente",ext:true}
+};
+for(const id in PEOPLE){const p=PEOPLE[id];if(p.ext)continue;
+  const g=el("g",{class:"person",transform:`translate(${p.x},${p.y})`,tabindex:0,role:"button","aria-label":p.name},L.people);
+  el("circle",{r:19,cy:-1,class:"ring"},g);el("rect",{x:-20,y:-20,width:40,height:44,class:"hit"},g);
+  const pg=el("g",{class:"pop",style:`animation-delay:${(1.2+Math.random()*0.4).toFixed(2)}s`},g);
+  const bg=el("g",{class:"bob",style:`animation-delay:${(-Math.random()*3).toFixed(2)}s`},pg);
+  el("circle",{cx:0,cy:-9,r:6,style:`fill:${p.col}`},bg);
+  el("path",{d:"M-10 8a10 10 0 0 1 20 0z",style:`fill:${p.col}`},bg);
+  el("text",{x:0,y:21,"text-anchor":"middle",class:"plabel",style:`fill:${p.col}`},pg,p.short);
+  const go=()=>{if(id==="agent"){openTab("sce");startScen("bloc");}else{openTab("acc");runPerson(id);}};
+  g.addEventListener("click",ev=>{ev.stopPropagation();go();});
+  g.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();go();}});
+  p.g=g;
+}
+
+/* ===================== ANIMATIONS ===================== */
+let ACTIVE="r1";
+const RT=()=>pt(ACTIVE),UP=()=>[pt(ACTIVE)[0],84];
+const TUN=[936,84],PART=[1013,62],INET=[243,62],INETW=[300,84];
+let runId=0;
+function resetFx(){
+  runId++;ACTIVE="r1";CUR_AP="ap";svg.classList.remove("showcov");L.cov.querySelectorAll(".off").forEach(c=>c.classList.remove("off"));L.fx.innerHTML="";
+  Object.values(EQ).forEach(e=>{e.g.classList.remove("sel","hl","bad","good","down");if(e.hidden)e.g.style.display="none";});
+  Object.values(PEOPLE).forEach(p=>p.g&&p.g.classList.remove("sel","hl","bad"));
+  Object.values(ROOMS).forEach(r=>r.el.classList.remove("sel"));
+  const lp=EQ.badge.g.querySelector(".lamp");lp.style.fill="var(--muted)";lp.classList.remove("lamp-on");
+}
+function mark(p,ok){
+  el("circle",{cx:p[0],cy:p[1],r:7,class:"ripple",style:`stroke:var(--${ok?"ok":"bad"})`},L.fx);
+  if(ok){const g=el("g",{transform:`translate(${p[0]},${p[1]})`},L.fx);const gi=el("g",{class:"popin"},g);el("circle",{r:10,class:"ck"},gi);el("path",{d:"M-4.5 0l3 3 6-6",style:"stroke:var(--surface);stroke-width:2.4;fill:none;stroke-linecap:round"},gi);}
+  else el("path",{d:`M${p[0]-11} ${p[1]-11}L${p[0]+11} ${p[1]+11}M${p[0]+11} ${p[1]-11}L${p[0]-11} ${p[1]+11}`,class:"xm popin"},L.fx);
+}
+function bubble(p,text,dy){
+  dy=dy==null?-30:dy;
+  const g=el("g",{class:"bubble popin"},L.fx);
+  const t=el("text",{x:p[0],y:p[1]+dy,"text-anchor":"middle"},g,text);
+  let w=text.length*6+16;try{const m=t.getComputedTextLength();if(m)w=m+16;}catch(e){}
+  el("rect",{x:p[0]-w/2,y:p[1]+dy-13,width:w,height:19,rx:4},g);g.appendChild(t);
+}
+function fly(pts,kind,instant,end){
+  const my=runId;
+  return new Promise(res=>{
+    const poly=el("polyline",{points:pts.map(p=>p.join(",")).join(" "),class:"fx-"+kind},L.fx);
+    const col=`var(--${kind==="info"?"accent":kind})`;
+    const halo=el("circle",{r:15,class:"halo",style:`fill:${col}`},L.fx);
+    const dot=el("circle",{r:7,class:"pkt",style:`fill:${col}`},L.fx);
+    const last=pts[pts.length-1];
+    const done=()=>{dot.remove();halo.remove();if(end!==false&&kind!=="info")mark(last,kind==="ok");res();};
+    if(instant||REDUCE){done();return;}
+    const len=poly.getTotalLength();poly.style.strokeDasharray=len;poly.style.strokeDashoffset=len;
+    const dur=Math.min(2600,Math.max(700,len*1.9));let t0=null;
+    const step=ts=>{if(my!==runId){dot.remove();halo.remove();res();return;}if(t0===null)t0=ts;const k=Math.min(1,(ts-t0)/dur);const p=poly.getPointAtLength(k*len);dot.setAttribute("cx",p.x);dot.setAttribute("cy",p.y);halo.setAttribute("cx",p.x);halo.setAttribute("cy",p.y);poly.style.strokeDashoffset=len*(1-k);if(k<1)requestAnimationFrame(step);else done();};
+    requestAnimationFrame(step);
+  });
+}
+const wait=(ms,instant)=>instant||REDUCE?Promise.resolve():new Promise(r=>setTimeout(r,ms));
+
+/* ===================== RÈGLES D'ACCÈS ===================== */
+const TARGETS=[["srv-dir","Données de la direction"],["srv-adm","Données de l’administration"],["srv-med","Dossiers médicaux"],["inet","Internet"],["partner","Dossiers de l’autre hôpital"]];
+const viaR1=id=>[RT(),pt(EQ[id].sw),pt(id)];
+const VPN_IN=()=>TUNPTS.slice().reverse().concat([pt("sw2"),RT()]);
+function rule(pid,t){
+  const P=PEOPLE[pid];
+  if(pid==="intrus")return {ok:false,pts:toSwitchPts("intrus"),why:"La prise reste fermée : sans compte reconnu par RADIUS, le switch ne laisse rien passer et le poste n’obtient pas d’adresse (pas de VLAN invité)."};
+  if(pid==="pirate"){if(t==="inet"||t==="partner")return null;return {ok:false,pts:[INET,[311,64],[470,64],[470,104]],why:"Aucun câble ne relie la clinique à Internet : le second port du routeur est éteint et il n’a pas de route par défaut."};}
+  if(pid==="partenaire"){if(t==="inet"||t==="partner")return null;
+    if(t==="srv-med")return {ok:true,pts:VPN_IN().concat([pt("sw1"),pt("srv-med")]),why:"Arrive par le tunnel WireGuard sur notre serveur VPN, puis le routeur l’autorise (règle 11) : base des patients uniquement, avec un compte en lecture seule."};
+    return {ok:false,pts:VPN_IN(),why:"Depuis l’autre hôpital, seule la base des patients est autorisée. La règle 15 du routeur refuse tout le reste."};}
+  if(!P.dev)return null;
+  const v=EQ[P.dev].vlan,start=toSwitchPts(P.dev),psw=P.dev==="tablet"?EQ[CUR_AP].sw:EQ[P.dev].sw;
+  const home={10:"srv-dir",20:"srv-adm",30:"srv-med"}[v];
+  if(t===home)return {ok:true,pts:start.concat(psw!==EQ[t].sw?[pt(EQ[t].sw)]:[]).concat([pt(t)]),why:`Même VLAN ${v} que le poste : les switches les relient directement, sans passer par le routeur.`};
+  if(t==="inet")return {ok:false,pts:start.concat([RT()]),why:"Le routeur n’a aucune route vers Internet : la règle 15 refuse et journalise."};
+  if(v===10&&t==="srv-adm")return {ok:true,pts:start.concat(viaR1(t)),why:"Règle 1 : la direction a le droit d’accéder au VLAN 20 de l’administration."};
+  if(v===30&&t==="partner")return {ok:true,pts:start.concat([RT(),pt("sw2")]).concat(TUNPTS),why:"Règle 12 : le routeur envoie le trafic vers 10.1.30.0/24 au serveur VPN, qui le chiffre dans le tunnel."};
+  return {ok:false,pts:start.concat([RT()]),why:"Règle 15 : aucune règle n’autorise ce profil à accéder à ces données. Le routeur refuse et journalise."};
+}
+
+/* ===================== PANNEAU ===================== */
+const pane=$("#pane");
+let tab="exp";
+function openTab(t){tab=t;svg.classList.toggle("busy",t!=="exp");["exp","acc","sce"].forEach(k=>$("#t-"+k).setAttribute("aria-selected",String(k===t)));}
+$("#t-exp").addEventListener("click",()=>{openTab("exp");resetFx();renderIntro();});
+$("#t-acc").addEventListener("click",()=>{openTab("acc");resetFx();renderAccess(null);});
+$("#t-sce").addEventListener("click",()=>{openTab("sce");resetFx();renderScenList();});
+const ICON={
+  wall:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg>',
+  id:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h4"/></svg>',
+  off:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
+  vpn:'<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  dup:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="6" rx="1.5"/><rect x="13" y="4" width="8" height="6" rx="1.5"/><path d="M7 10v4h10v-4M12 14v6"/></svg>',
+  save:'<svg viewBox="0 0 24 24"><path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>',
+  door:'<svg viewBox="0 0 24 24"><path d="M6 21V4h10v17M4 21h16M13 12h.01"/></svg>'
+};
+function renderIntro(){
+  pane.innerHTML=`
+  <span class="kicker">Bienvenue</span>
+  <h2>Le réseau d’une clinique, vu de l’intérieur</h2>
+  <p class="lead">Voici le plan de la clinique et de son réseau informatique. Cliquez sur une pièce, un équipement ou une personne pour comprendre son rôle.</p>
+  <h3>Les règles du réseau</h3>
+  <ul class="rules">
+    <li><span class="ic">${ICON.wall}</span><span><b>Trois espaces séparés.</b> Direction (VLAN 10), administration (20) et médical (30) ont chacun leur réseau, plus 4 VLAN techniques. La direction voit aussi l’administration ; personne d’autre ne sort de son espace.</span></li>
+    <li><span class="ic">${ICON.id}</span><span><b>Chacun s’identifie.</b> Sur une prise ou en Wi-Fi, chaque personne entre son identifiant (802.1X). Le serveur RADIUS décide de son réseau.</span></li>
+    <li><span class="ic">${ICON.off}</span><span><b>Internet est coupé.</b> Aucun câble vers Internet, aucune route : rien ne sort, rien n’entre.</span></li>
+    <li><span class="ic">${ICON.vpn}</span><span><b>Un tunnel vers l’autre hôpital.</b> Le VPN sert uniquement à consulter les dossiers médicaux.</span></li>
+    <li><span class="ic">${ICON.dup}</span><span><b>Pas de point de panne unique.</b> Évolution proposée sur la maquette : deux routeurs qui se relaient automatiquement (HSRP), chaque switch relié aux deux, et deux bornes Wi-Fi sur deux switches différents. <a href="#" data-go="s:routeur" style="color:var(--accent)">Panne de routeur</a> · <a href="#" data-go="s:wifi" style="color:var(--accent)">panne de borne Wi-Fi</a></span></li>
+    <li><span class="ic">${ICON.save}</span><span><b>Rien ne se perd.</b> Sauvegarde chaque nuit, serveur de secours, réinstallation automatique.</span></li>
+    <li><span class="ic">${ICON.door}</span><span><b>Le bloc est protégé.</b> Porte à badge selon le planning des opérations.</span></li>
+  </ul>
+  <h3>Pour aller plus loin</h3>
+  <div class="links">
+    <button type="button" data-go="acc">Qui accède ?</button>
+    <button type="button" data-go="sce">Voir des scénarios</button>
+    <button type="button" data-go="net">Afficher les réseaux</button>
+    <button type="button" data-go="doc:ip">Plan d’adressage complet</button>
+    <button type="button" data-go="doc:data">Rôles, échanges et données</button>
+    <button type="button" data-go="doc:sec">Sécurité : vulnérabilités et tests</button>
+    <button type="button" data-go="room:tech">Le local technique</button>
+  </div>
+  <p class="lead" style="font-size:.8rem">Matériel : 1 routeur Cisco 1841, 2 switches Cisco Catalyst, des bornes Wi-Fi Linksys WRT54G sous DD-WRT, des serveurs et des postes compatibles 802.1X. L’architecture est d’abord validée sur une maquette GNS3, puis montée sur le vrai matériel.</p>`;
+  bindLinks();
+}
+function bindLinks(){
+  pane.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",ev=>{
+    ev.preventDefault();const g=b.dataset.go;
+    if(g==="acc"){openTab("acc");resetFx();renderAccess(null);}
+    else if(g==="sce"){openTab("sce");resetFx();renderScenList();}
+    else if(g==="net"){setNet(true);}
+    else if(g.startsWith("room:"))showRoom(g.slice(5));
+    else if(g.startsWith("eq:"))showEq(g.slice(3));
+    else if(g.startsWith("p:")){openTab("acc");runPerson(g.slice(2));}
+    else if(g.startsWith("s:")){startScen(g.slice(2));}
+    else if(g.startsWith("doc:")){openDoc(g.slice(4));}
+  }));
+}
+const VNAME={10:"Direction",20:"Administration",30:"Médical",40:"Services",50:"Badges",60:"VPN",99:"Gestion"};
+const vlanChip=v=>v?`<span class="chip"><span class="dot" style="background:var(--v${v})"></span>VLAN ${v} · ${VNAME[v]}</span>`:`<span class="chip">Pas de réseau</span>`;
+function showRoom(id){
+  const r=ROOMS[id];openTab("exp");resetFx();r.el.classList.add("sel");
+  const eqs=Object.values(EQ).filter(e=>e.room===id&&!e.hidden);
+  const ppl=Object.entries(PEOPLE).filter(([,p])=>p.room===id);
+  eqs.forEach(e=>e.g.classList.add("hl"));
+  pane.innerHTML=`<span class="kicker">Pièce · ${area(r)} m²</span><h2>${esc(r.name)}</h2>
+  <div>${id==="tech"?[40,50,60,99].map(vlanChip).join(" "):vlanChip(r.vlan)}</div>
+  <p>${esc(r.text)}</p>
+  <dl class="facts"><dt>Qui</dt><dd>${esc(r.who)}</dd><dt>Accès</dt><dd>${r.access.map(esc).join("<br>")}</dd></dl>
+  ${eqs.length?`<h3>Équipements</h3><div class="links">${eqs.map(e=>`<button type="button" data-go="eq:${e.id}">${esc(e.lab||e.name)}</button>`).join("")}</div>`:""}
+  ${ppl.length?`<h3>Personnel</h3><div class="links">${ppl.map(([k,p])=>`<button type="button" data-go="${k==="agent"?"s:bloc":"p:"+k}">${esc(p.name)} : ${k==="agent"?"accès au bloc":"que peut-il voir ?"}</button>`).join("")}</div>`:""}
+  ${id==="bloc"?`<div class="links"><button type="button" data-go="s:bloc">Tester la porte à badge</button></div>`:""}`;
+  bindLinks();
+}
+function showEq(id){
+  const e=EQ[id];openTab("exp");resetFx();e.g.classList.add("sel");
+  const extra={
+    r1:`<div class="links"><button type="button" data-go="s:routeur">Que se passe-t-il s’il tombe en panne ?</button><button type="button" data-go="acc">Voir ce qu’il autorise</button><button type="button" data-go="s:pirate">Attaque depuis Internet</button></div>`,
+    r2:`<div class="links"><button type="button" data-go="s:routeur">Voir la bascule R1 → R2</button></div>`,
+    sw2:`<div class="links"><button type="button" data-go="s:switch">Que se passe-t-il si SW1 tombe ?</button></div>`,
+    sw1:`<div class="links"><button type="button" data-go="s:switch">Que se passe-t-il s’il tombe en panne ?</button><button type="button" data-go="s:intrus">Un intrus branche son ordinateur</button></div>`,
+    radius:`<div class="links"><button type="button" data-go="s:dot1x">Voir une connexion 802.1X</button></div>`,
+    secours:`<div class="links"><button type="button" data-go="s:panne">Scénario : panne du serveur médical</button><button type="button" data-go="s:ransom">Scénario rançongiciel</button></div>`,
+    dns:`<div class="links"><button type="button" data-go="s:panne">Voir la bascule par le DNS</button></div>`,
+    "srv-vpn":`<div class="links"><button type="button" data-go="s:vpn">Échange avec l’autre hôpital</button></div>`,
+    "srv-badge":`<div class="links"><button type="button" data-go="s:bloc">Tester la porte à badge</button></div>`,
+    secours:`<div class="links"><button type="button" data-go="s:panne">Scénario panne de serveur</button></div>`,
+    nagios:`<div class="links"><button type="button" data-go="s:panne">Scénario panne de serveur</button></div>`,
+    "srv-med":`<div class="links"><button type="button" data-go="s:vpn">Échange avec l’autre hôpital</button></div>`,
+    badge:`<div class="links"><button type="button" data-go="s:bloc">Tester la porte à badge</button></div>`,
+    ap:`<div class="links"><button type="button" data-go="s:wifi">Que se passe-t-il si elle tombe en panne ?</button><button type="button" data-go="p:infirmier">Que voit un infirmier en Wi-Fi ?</button></div>`,
+    ap2:`<div class="links"><button type="button" data-go="s:wifi">Voir la reprise par la borne n°2</button></div>`
+  }[id]||"";
+  pane.innerHTML=`<span class="kicker">Équipement · ${esc(ROOMS[e.room].name)}</span><h2>${esc(e.name)}</h2>
+  ${e.vlan?`<div>${vlanChip(e.vlan)}</div>`:""}
+  <div class="links"><button type="button" data-go="doc:ip">Voir le plan d’adressage</button></div>
+  <p>${esc(e.text)}</p>
+  <dl class="facts">${e.dns?`<dt>Nom</dt><dd class="mono">${e.dns}.hopital.lan</dd>`:""}<dt>Adresse</dt><dd class="mono">${esc(e.ip)}</dd>${e.sw?`<dt>Branché sur</dt><dd>${e.via?"la borne Wi-Fi":esc(EQ[e.sw].name)}</dd>`:""}</dl>${extra}`;
+  bindLinks();
+}
+/* ---- Qui accède à quoi ---- */
+const PLIST=["directrice","secretaire","accueil","medecin","infirmier","agent","partenaire","pirate","intrus"];
+function renderAccess(pid,results){
+  pane.innerHTML=`<span class="kicker">Qui accède à quoi ?</span>
+  <p class="lead">Choisissez une personne : des paquets partent de son appareil vers chaque donnée. Vert : arrivé. Rouge : bloqué, à l’endroit exact du blocage.</p>
+  <div class="people">${PLIST.map(k=>`<button type="button" aria-pressed="${k===pid}" data-p="${k}">${esc(PEOPLE[k].name)}</button>`).join("")}</div>
+  <div>${results||""}</div>`;
+  pane.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>runPerson(b.dataset.p)));
+  pane.querySelectorAll("[data-t]").forEach(li=>li.addEventListener("click",()=>replayOne(pid,li.dataset.t)));
+  bindLinks();
+}
+function runPerson(pid){
+  resetFx();const P=PEOPLE[pid];
+  if(P.g)P.g.classList.add("sel");
+  if(pid==="intrus")EQ.intrus.g.style.display="";
+  if(pid==="agent"){P.g.classList.add("hl");renderAccess(pid,`<div class="verdict"><b>Pas de compte informatique.</b> L’agent d’entretien n’accède à aucune donnée. Son badge lui ouvre le bloc opératoire en dehors des opérations.<div class="links" style="margin-top:8px"><button type="button" data-go="s:bloc">Tester la porte du bloc</button></div></div>`);return;}
+  const rows=[];
+  TARGETS.forEach(([t,label])=>{const r=rule(pid,t);if(!r)return;rows.push([t,label,r]);fly(r.pts,r.ok?"ok":"bad");});
+  const n=rows.filter(x=>x[2].ok).length;
+  renderAccess(pid,`<h3 style="margin:4px 0 8px">${esc(P.name)} : ${n===0?"aucun accès":n+" accès autorisé"+(n>1?"s":"")}</h3>
+  <ul class="access">${rows.map(([t,label,r])=>`<li class="${r.ok?"y":"n"}" data-t="${t}" style="--d:${(0.1+TARGETS.findIndex(x=>x[0]===t)*0.07).toFixed(2)}s"><span class="mk">${r.ok?"✓":"✕"}</span><span><b>${esc(label)}</b><small>${esc(r.why)}</small></span></li>`).join("")}</ul>
+  <p class="lead" style="font-size:.8rem;margin-top:8px">Cliquez une ligne pour rejouer ce trajet seul.</p>`);
+}
+function replayOne(pid,t){
+  resetFx();const P=PEOPLE[pid];if(P.g)P.g.classList.add("sel");if(pid==="intrus")EQ.intrus.g.style.display="";
+  const r=rule(pid,t);if(r)fly(r.pts,r.ok?"ok":"bad");
+}
+
+/* ---- Scénarios ---- */
+const SCEN={
+  dot1x:{title:"Un médecin se connecte",sub:"Identification 802.1X et RADIUS",steps:[
+    {t:"Le médecin allume son poste en consultation. La prise réseau est fermée : tant qu’il ne s’est pas identifié, le switch ne laisse rien passer.",a:async i=>{PEOPLE.medecin.g.classList.add("hl");EQ["pc-cons"].g.classList.add("hl");bubble(pt("pc-cons"),"prise fermée");}},
+    {t:"Il saisit son identifiant (med01) et son mot de passe. Le switch transmet la demande au serveur RADIUS (10.0.40.10), autorisé par la règle 5.",a:async i=>{EQ.sw2.g.classList.add("hl");EQ.radius.g.classList.add("hl");await fly(toSwitchPts("pc-cons").concat([pt("radius")]),"info",i);}},
+    {t:"RADIUS trouve med01 dans le groupe medical et répond « accepté », avec le VLAN 30.",a:async i=>{EQ.radius.g.classList.add("good");await fly([pt("radius"),pt("sw2")],"ok",i,false);bubble(pt("sw2"),"accepté · VLAN 30",-20);}},
+    {t:"La prise s’ouvre : le poste reçoit par DHCP une adresse 10.0.30.1xx (passerelle 10.0.30.1, DNS 10.0.40.11). Il accède à la base des patients, et à rien d’autre.",a:async i=>{EQ["srv-med"].g.classList.add("good");await fly(rule("medecin","srv-med").pts,"ok",i);}}
+  ]},
+  ransom:{title:"Un rançongiciel sur un poste",sub:"Le cloisonnement limite les dégâts",steps:[
+    {t:"Une secrétaire ouvre une pièce jointe piégée : son poste est infecté par un rançongiciel.",a:async i=>{EQ["pc-adm2"].g.classList.add("bad");PEOPLE.secretaire.g.classList.add("hl");bubble(pt("pc-adm2"),"poste infecté");}},
+    {t:"Le virus tente d’atteindre la base des patients et les données de la direction. Le routeur bloque (règle 15) : le VLAN 20 n’a pas le droit d’y aller.",a:async i=>{EQ["pc-adm2"].g.classList.add("bad");await Promise.all([fly(rule("secretaire","srv-med").pts,"bad",i),wait(350,i).then(()=>fly(rule("secretaire","srv-dir").pts,"bad",i))]);}},
+    {t:"Il essaie de contacter ses pirates sur Internet pour recevoir des ordres et envoyer les données volées. Impossible : il n’y a ni câble ni route vers Internet.",a:async i=>{EQ["pc-adm2"].g.classList.add("bad");await fly(rule("secretaire","inet").pts,"bad",i);}},
+    {t:"Seul le serveur de l’administration est touché. On débranche le poste, on remet le serveur à zéro et on restaure la dernière sauvegarde depuis srv-secours (règle 7), que le virus ne pouvait pas atteindre.",a:async i=>{EQ["pc-adm2"].g.classList.add("down");EQ["srv-adm"].g.classList.add("bad");await wait(500,i);EQ.secours.g.classList.add("hl");await fly([pt("secours"),pt("sw2"),RT(),pt("sw1"),pt("srv-adm")],"ok",i);EQ["srv-adm"].g.classList.remove("bad");EQ["srv-adm"].g.classList.add("good");}}
+  ]},
+  panne:{title:"Le serveur médical tombe en panne",sub:"Supervision et bascule par le DNS",steps:[
+    {t:"En pleine journée, le disque du serveur médical lâche. La base des patients ne répond plus.",a:async i=>{EQ["srv-med"].g.classList.add("bad");bubble(pt("srv-med"),"en panne",-26);}},
+    {t:"Nagios (10.0.40.30) ne reçoit plus de réponse (règle 6) et alerte le service informatique.",a:async i=>{EQ["srv-med"].g.classList.add("bad");EQ.nagios.g.classList.add("hl");await fly([pt("nagios"),pt("sw2"),RT(),pt("sw1"),pt("srv-med")],"bad",i);bubble(pt("nagios"),"alerte !",-24);}},
+    {t:"Un script change l’alias DNS bdd-patients.hopital.lan : il pointe maintenant vers srv-secours (10.0.40.20), qui a la dernière sauvegarde. Avec une durée de vie de 30 s, les postes suivent très vite.",a:async i=>{EQ["srv-med"].g.classList.add("down");EQ.dns.g.classList.add("hl");EQ.secours.g.classList.add("hl");await fly([pt("nagios"),pt("sw2"),pt("dns")],"info",i);bubble(pt("dns"),"bdd-patients → srv-secours",-24);}},
+    {t:"Les médecins retrouvent les dossiers sur le serveur de secours (règle 9). Le serveur médical est réinstallé automatiquement, puis l’alias revient vers lui.",a:async i=>{EQ["srv-med"].g.classList.add("down");EQ.secours.g.classList.add("good");await fly(toSwitchPts("pc-cons").concat([RT(),pt("sw2"),pt("secours")]),"ok",i);}}
+  ]},
+  intrus:{title:"Un intrus branche son ordinateur",sub:"Les prises sont protégées par 802.1X",steps:[
+    {t:"Dans la salle d’attente, quelqu’un branche discrètement son portable sur une prise murale.",a:async i=>{EQ.intrus.g.style.display="";EQ.intrus.g.classList.add("bad");bubble(pt("intrus"),"ordinateur inconnu");}},
+    {t:"Le switch lui demande de s’identifier et transmet au serveur RADIUS. L’intrus n’a pas de compte : refus.",a:async i=>{EQ.intrus.g.style.display="";EQ.intrus.g.classList.add("bad");await fly(toSwitchPts("intrus").concat([pt("sw2"),pt("radius")]),"info",i);await fly([pt("radius"),pt("sw2"),pt("sw1")],"bad",i,false);bubble(pt("sw1"),"refusé",-18);}},
+    {t:"La prise reste fermée : pas d’adresse, pas de VLAN invité, aucune machine visible. La tentative est enregistrée.",a:async i=>{EQ.intrus.g.style.display="";EQ.intrus.g.classList.add("bad");await fly(toSwitchPts("intrus"),"bad",i);}}
+  ]},
+  pirate:{title:"Une attaque depuis Internet",sub:"Aucun câble, aucune route",steps:[
+    {t:"Un pirate scanne Internet à la recherche d’hôpitaux vulnérables et vise la clinique.",a:async i=>{bubble(INET,"pirate",42);}},
+    {t:"Il n’existe aucun câble entre la clinique et Internet : le second port du routeur est éteint. Rien ne peut entrer.",a:async i=>{await fly(rule("pirate","srv-med").pts,"bad",i);}},
+    {t:"Dans l’autre sens, aucun poste ne peut sortir : le routeur n’a pas de route par défaut et la règle 15 refuse tout le reste. Un virus ne peut ni recevoir d’ordres, ni envoyer de données.",a:async i=>{EQ.r1.g.classList.add("hl");await Promise.all([fly(rule("medecin","inet").pts,"bad",i),fly(rule("directrice","inet").pts,"bad",i)]);}}
+  ]},
+  vpn:{title:"Échange avec l’autre hôpital",sub:"VPN WireGuard, base médicale uniquement",steps:[
+    {t:"Un médecin de l’hôpital partenaire consulte le dossier d’un patient transféré. Sa demande passe dans le tunnel jusqu’à notre serveur VPN (10.0.60.10), puis le routeur l’autorise vers la base des patients, en lecture seule (règle 11).",a:async i=>{EQ["srv-vpn"].g.classList.add("hl");EQ["srv-med"].g.classList.add("good");await fly(rule("partenaire","srv-med").pts,"ok",i);}},
+    {t:"S’il essaie d’atteindre les données de l’administration ou de la direction, le routeur refuse : seule la base médicale est autorisée.",a:async i=>{await fly(rule("partenaire","srv-adm").pts,"bad",i);}},
+    {t:"Dans l’autre sens, nos médecins consultent la base médicale de l’hôpital partenaire, 10.1.30.0/24 (règle 12). Le routeur envoie ce trafic au serveur VPN, qui le chiffre.",a:async i=>{PEOPLE.medecin.g.classList.add("hl");await fly(rule("medecin","partner").pts,"ok",i);}}
+  ]},
+  routeur:{title:"Le routeur principal tombe en panne",sub:"Évolution : R2 prend le relais (HSRP)",steps:[
+    {t:"Sur la maquette, R1 est le routeur actif : tout le trafic entre les VLAN passe par lui. R2 est en veille et reçoit toutes les 3 secondes le message « je suis vivant » de R1.",a:async i=>{EQ.r1.g.classList.add("good");EQ.r2.g.classList.add("hl");bubble(pt("r2"),"en veille",-24);await fly(rule("directrice","srv-adm").pts,"ok",i);}},
+    {t:"R1 tombe en panne (alimentation, plantage, câble arraché). Les paquets qui arrivent sur lui sont perdus.",a:async i=>{EQ.r1.g.classList.add("bad");bubble(pt("r1"),"en panne",-24);await fly(toSwitchPts("pc-dir1").concat([pt("r1")]),"bad",i);}},
+    {t:"R2 ne reçoit plus le message de R1. Au bout de 10 secondes, il se déclare actif et reprend la passerelle .1 de chaque VLAN. Aucun réglage à changer sur les postes.",a:async i=>{EQ.r1.g.classList.add("down");EQ.r2.g.classList.add("good");ACTIVE="r2";bubble(pt("r2"),"devient actif",-24);await wait(400,i);}},
+    {t:"Le trafic repart par R2 : la directrice consulte de nouveau l’administration, et l’échange avec l’autre hôpital reprend. Une fois R1 réparé, il redevient actif.",a:async i=>{EQ.r1.g.classList.add("down");EQ.r2.g.classList.add("good");ACTIVE="r2";await Promise.all([fly(rule("directrice","srv-adm").pts,"ok",i),wait(300,i).then(()=>fly(rule("medecin","partner").pts,"ok",i))]);}}
+  ]},
+  switch:{title:"Un switch tombe en panne",sub:"Ce qui s’arrête, ce qui continue",steps:[
+    {t:"SW1 tombe en panne. Il porte les serveurs direction, administration et médical, la borne Wi-Fi et les postes de la direction, de l’administration et de l’accueil.",a:async i=>{EQ.sw1.g.classList.add("bad");bubble(pt("sw1"),"en panne",-22);}},
+    {t:"Les médecins (branchés sur SW2) ne joignent plus la base des patients, qui est sur SW1.",a:async i=>{EQ.sw1.g.classList.add("down");await fly(toSwitchPts("pc-cons").concat([pt("sw1")]),"bad",i);}},
+    {t:"Les services communs sont sur SW2 et continuent de fonctionner. Le script de bascule fait pointer bdd-patients vers srv-secours : les médecins retrouvent les dossiers.",a:async i=>{EQ.sw1.g.classList.add("down");EQ.dns.g.classList.add("hl");EQ.secours.g.classList.add("good");await fly([pt("nagios"),pt("sw2"),pt("dns")],"info",i);await fly(toSwitchPts("pc-cons").concat([RT(),pt("sw2"),pt("secours")]),"ok",i);}},
+    {t:"On remplace SW1 et on recharge sa configuration depuis GitHub. C’est le point faible de l’architecture : un switch de rechange, ou des serveurs répartis sur les deux switches, le réduiraient.",a:async i=>{EQ.sw1.g.classList.add("hl");bubble(pt("sw1"),"remplacé",-22);}}
+  ]},
+  dos:{title:"Un déni de service",sub:"Un poste infecté inonde le réseau",steps:[
+    {t:"Un poste de l’administration, infecté, se met à envoyer des milliers de paquets par seconde pour saturer les serveurs.",a:async i=>{EQ["pc-adm1"].g.classList.add("bad");bubble(pt("pc-adm1"),"inondation !");if(i||REDUCE)return;for(let k=0;k<6;k++){fly(toSwitchPts("pc-adm1").concat([pt("srv-adm")]),"bad",false,false);await wait(160);}await wait(900);}},
+    {t:"Vers les autres VLAN, le routeur jette tout (règle 15) : la base des patients et la direction ne sont pas touchées.",a:async i=>{EQ["pc-adm1"].g.classList.add("bad");if(i||REDUCE){mark(RT(),false);return;}for(let k=0;k<4;k++){fly(toSwitchPts("pc-adm1").concat([RT()]),"bad",false,k===3);await wait(200);}await wait(1400);}},
+    {t:"Dans son propre VLAN, le serveur de l’administration ralentit. Le switch limite le débit de la prise (storm-control) et Nagios détecte la surcharge.",a:async i=>{EQ["pc-adm1"].g.classList.add("bad");EQ["srv-adm"].g.classList.add("bad");EQ.nagios.g.classList.add("hl");bubble(pt("sw1"),"débit limité",-20);await fly([pt("nagios"),pt("sw2"),RT(),pt("sw1"),pt("srv-adm")],"info",i);bubble(pt("nagios"),"surcharge srv-adm",-24);}},
+    {t:"Le service informatique coupe la prise du poste (shutdown) : l’inondation s’arrête et le serveur repart. Depuis Internet, ce type d’attaque est impossible (aucun câble) ; depuis l’autre hôpital, seul le port de la base est ouvert.",a:async i=>{EQ["pc-adm1"].g.classList.add("down");EQ["srv-adm"].g.classList.add("good");bubble(pt("pc-adm1"),"prise coupée");await fly(rule("directrice","srv-adm").pts,"ok",i);}}
+  ]},
+  reinstall:{title:"Réinstaller un serveur effacé",sub:"Réinstallation automatisée et restauration",steps:[
+    {t:"Le système de srv-med est effacé (rançongiciel, disque remplacé). Pendant ce temps, l’alias bdd-patients pointe vers srv-secours : les médecins continuent de travailler.",a:async i=>{EQ["srv-med"].g.classList.add("bad");EQ.dns.g.classList.add("hl");EQ.secours.g.classList.add("good");bubble(pt("dns"),"bdd-patients → srv-secours",-24);}},
+    {t:"On réinstalle le système de base à partir d’une image ou d’un ISO Debian avec fichier de réponses : adresse 10.0.30.10, compte d’administration, clé SSH de srv-secours.",a:async i=>{EQ["srv-med"].g.classList.add("hl");EQ.secours.g.classList.add("good");bubble(pt("srv-med"),"système neuf",-26);await wait(500,i);}},
+    {t:"Un script lancé depuis srv-secours installe Docker et pousse la configuration versionnée sur GitHub (copie locale, car il n’y a pas d’Internet).",a:async i=>{EQ["srv-med"].g.classList.add("hl");EQ.secours.g.classList.add("hl");await fly([pt("secours"),pt("sw2"),RT(),pt("sw1"),pt("srv-med")],"info",i);bubble(pt("srv-med"),"Docker + configuration",-26);}},
+    {t:"Le script restaure les données de la dernière sauvegarde et redémarre la base des patients.",a:async i=>{EQ["srv-med"].g.classList.add("hl");EQ.secours.g.classList.add("hl");await fly([pt("secours"),pt("sw2"),RT(),pt("sw1"),pt("srv-med")],"ok",i);bubble(pt("srv-med"),"données restaurées",-26);}},
+    {t:"Après un test depuis un poste médical, l’alias bdd-patients revient vers srv-med. Tout est de nouveau normal, sans intervention manuelle sur la configuration.",a:async i=>{EQ["srv-med"].g.classList.add("good");EQ.dns.g.classList.add("hl");await fly([pt("nagios"),pt("sw2"),pt("dns")],"info",i);await fly(rule("medecin","srv-med").pts,"ok",i);}}
+  ]},
+  quota:{title:"Sauvegarde de nuit et quotas",sub:"Copie automatique et contrôle de l’espace disque",steps:[
+    {t:"Chaque nuit à 02h00, srv-secours vient copier les données de srv-dir, srv-adm et srv-med (règle 7). C’est lui qui va chercher : les postes ne peuvent pas écrire sur les sauvegardes.",a:async i=>{EQ.secours.g.classList.add("hl");bubble(pt("secours"),"02h00",-26);await Promise.all(["srv-dir","srv-adm","srv-med"].map((id,k)=>wait(k*250,i).then(()=>fly([pt("secours"),pt("sw2"),RT(),pt("sw1"),pt(id)],"info",i))));await Promise.all(["srv-dir","srv-adm","srv-med"].map((id,k)=>wait(k*250,i).then(()=>fly([pt(id),pt("sw1"),RT(),pt("sw2"),pt("secours")],"ok",i,k===2))));}},
+    {t:"Après la copie, un script vérifie l’espace disque et supprime les copies les plus anciennes (proposition : on garde les 7 derniers jours).",a:async i=>{EQ.secours.g.classList.add("good");bubble(pt("secours"),"disque : 62 %",-26);await wait(400,i);}},
+    {t:"Si le disque dépasse 80 %, Nagios alerte le service informatique avant que les sauvegardes échouent : on ajoute de l’espace ou on réduit la durée de conservation.",a:async i=>{EQ.secours.g.classList.add("bad");EQ.nagios.g.classList.add("hl");bubble(pt("secours"),"disque : 85 %",-26);await fly([pt("secours"),pt("sw2"),pt("nagios")],"bad",i,false);bubble(pt("nagios"),"alerte quota",-24);}},
+    {t:"Sur les serveurs de fichiers, un quota par utilisateur empêche un seul compte de remplir le disque. Une fois par semaine, on teste une restauration pour prouver que les sauvegardes sont utilisables.",a:async i=>{EQ["srv-dir"].g.classList.add("hl");bubble(pt("srv-dir"),"quota par utilisateur",-26);await fly([pt("secours"),pt("sw2"),RT(),pt("sw1"),pt("srv-dir")],"ok",i);}}
+  ]},
+  wifi:{title:"Une borne Wi-Fi tombe en panne",sub:"Deux bornes, un seul réseau Wi-Fi",steps:[
+    {t:"Deux bornes diffusent le même réseau Wi-Fi « HOPITAL » : la n°1 dans la salle de soins, la n°2 de l’autre côté du couloir, dans l’administration. Leurs zones de couverture se recouvrent. L’infirmier est connecté à la plus proche, la n°1.",a:async i=>{svg.classList.add("showcov");PEOPLE.infirmier.g.classList.add("hl");EQ.ap.g.classList.add("good");EQ.ap2.g.classList.add("hl");await fly(rule("infirmier","srv-med").pts,"ok",i);}},
+    {t:"La borne n°1 tombe en panne (alimentation, câble, matériel). La tablette perd la connexion.",a:async i=>{svg.classList.add("showcov");EQ.ap.g.classList.add("bad");covOff("ap");bubble(pt("ap"),"en panne",-30);await fly([pt("tablet"),pt("ap")],"bad",i);}},
+    {t:"La tablette cherche le même réseau « HOPITAL » et trouve la borne n°2. Elle s’identifie de nouveau en 802.1X : la borne n°2 interroge le même serveur RADIUS, qui l’accepte dans le VLAN 30.",a:async i=>{svg.classList.add("showcov");EQ.ap.g.classList.add("down");covOff("ap");CUR_AP="ap2";EQ.ap2.g.classList.add("good");await fly(toSwitchPts("tablet").concat([pt("radius")]),"info",i);bubble(pt("ap2"),"accepté · VLAN 30",-30);}},
+    {t:"L’infirmier retrouve les dossiers des patients. Les deux bornes sont branchées sur deux switches différents : même si un switch tombe, une borne reste en service.",a:async i=>{svg.classList.add("showcov");EQ.ap.g.classList.add("down");covOff("ap");CUR_AP="ap2";EQ.ap2.g.classList.add("good");await fly(rule("infirmier","srv-med").pts,"ok",i);}}
+  ]},
+  bloc:{title:"Qui peut entrer au bloc ?",sub:"Porte à badge et planning des opérations",interactive:true}
+};
+let curScen=null,curStep=0;
+function renderScenList(active){
+  pane.innerHTML=`<span class="kicker">Scénarios</span><p class="lead">Des situations réelles, rejouées sur le plan pour voir comment le réseau réagit.</p>
+  <div id="player"></div><div class="scen">${active?`<h3 style="margin-top:6px">Autres scénarios</h3>`:""}${Object.entries(SCEN).map(([k,s])=>`<button type="button" data-s="${k}" aria-pressed="${k===active}"><b>${esc(s.title)}</b><span>${esc(s.sub)}</span></button>`).join("")}</div>`;
+  pane.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>startScen(b.dataset.s)));
+}
+function startScen(k){
+  openTab("sce");renderScenList(k);curScen=k;resetFx();
+  $("#player").insertAdjacentHTML("beforebegin",`<h2>${esc(SCEN[k].title)}</h2>`);
+  $(".side").scrollTop=0;
+  if(SCEN[k].interactive)renderBloc();else goStep(0);
+}
+async function goStep(n){
+  const s=SCEN[curScen];curStep=Math.max(0,Math.min(s.steps.length-1,n));
+  resetFx();const my=runId;
+  $("#player").innerHTML=`<div class="player"><div class="progress">${s.steps.map((_,i)=>`<i class="${i<=curStep?"on":""}${i===curStep?" cur":""}"></i>`).join("")}</div>
+  <span class="stepn">Étape ${curStep+1} sur ${s.steps.length}</span><p>${esc(s.steps[curStep].t)}</p>
+  <div class="ctl"><button class="btn" type="button" id="spv" ${curStep===0?"disabled":""}>◀ Précédent</button>${curStep<s.steps.length-1?`<button class="btn primary" type="button" id="snx">Étape suivante ▶</button>`:`<button class="btn" type="button" id="srs">Rejouer depuis le début</button>`}</div></div>`;
+  const pv=$("#spv"),nx=$("#snx"),rs=$("#srs");
+  if(pv)pv.addEventListener("click",()=>goStep(curStep-1));
+  if(nx)nx.addEventListener("click",()=>goStep(curStep+1));
+  if(rs)rs.addEventListener("click",()=>goStep(0));
+  for(let i=0;i<curStep;i++){await s.steps[i].a(true);if(my!==runId)return;}
+  L.fx.innerHTML="";
+  await s.steps[curStep].a(false);
+}
+/* ---- Bloc opératoire ---- */
+const OPS=[[480,720,"arthroscopie du genou"],[840,990,"appendicectomie"]];
+function renderBloc(){
+  $("#player").innerHTML=`<div class="player">
+  <p>Le lecteur de badge (10.0.50.20) interroge le serveur des badges, qui vérifie dans la base des patients si une opération est en cours (règle 10). Choisissez qui badge et à quelle heure.</p>
+  <label class="lbl" for="bRole">Badge présenté<select id="bRole"><option value="med">Personnel médical</option><option value="ent">Personnel d’entretien</option><option value="adm">Administration</option></select></label>
+  <label class="lbl" for="bTime">Heure : <span id="bTl" class="mono" style="text-transform:none;color:var(--ink)"></span><input type="range" id="bTime" min="360" max="1320" step="15" value="570"></label>
+  <div><div class="tl" id="bLine"></div><div class="tl-scale"><span>06h</span><span>10h</span><span>14h</span><span>18h</span><span>22h</span></div></div>
+  <label style="display:flex;gap:8px;align-items:center;font-size:.86rem"><input type="checkbox" id="bDeg"> Mode dégradé : le serveur des badges ne répond plus</label>
+  <div class="verdict" id="bRes"></div></div>`;
+  const line=$("#bLine"),span=960;
+  OPS.forEach(o=>{const d=document.createElement("div");d.className="op";d.style.left=((o[0]-360)/span*100)+"%";d.style.width=((o[1]-o[0])/span*100)+"%";d.title=o[2];line.appendChild(d);});
+  const now=document.createElement("div");now.className="now";line.appendChild(now);
+  const hm=m=>String(Math.floor(m/60)).padStart(2,"0")+"h"+String(m%60).padStart(2,"0");
+  const upd=()=>{
+    resetFx();EQ.badge.g.classList.add("sel");ROOMS.bloc.el.classList.add("sel");
+    const t=+$("#bTime").value,role=$("#bRole").value,deg=$("#bDeg").checked;
+    $("#bTl").textContent=hm(t);now.style.left=`calc(${(t-360)/span*100}% - 1px)`;
+    const op=OPS.find(o=>t>=o[0]&&t<o[1]);let ok,msg;
+    if(deg){ok=role==="med";msg="En mode dégradé, la porte n’accepte plus que la liste des badges médicaux gardée en mémoire, quelle que soit l’heure.";}
+    else if(role==="med"){ok=!!op;msg=op?`Opération en cours (${op[2]}) : le personnel médical entre.`:"Aucune opération à cette heure : le bloc est réservé à l’entretien.";}
+    else if(role==="ent"){ok=!op;msg=op?`Opération en cours (${op[2]}) : l’entretien attend la fin.`:"Pas d’opération en cours : l’entretien peut nettoyer le bloc.";}
+    else{ok=false;msg="L’administration n’a jamais accès au bloc opératoire.";}
+    const lamp=EQ.badge.g.querySelector(".lamp");lamp.style.fill=ok?"var(--ok)":"var(--bad)";lamp.classList.add("lamp-on");
+    el("rect",{x:1070,y:463,width:50,height:14,rx:3,class:"doorflash",style:`fill:var(--${ok?"ok":"bad"})`},L.fx);
+    const who={med:PEOPLE.medecin,ent:PEOPLE.agent,adm:PEOPLE.secretaire}[role];who.g.classList.add("hl");
+    (async()=>{const my=runId;
+      await fly([[who.x,who.y],[who.x,430],[1020,430],[1045,452]],"info");if(my!==runId)return;
+      await fly(toSwitchPts("badge").concat([pt("srv-badge")]),"info");if(my!==runId)return;
+      await fly([pt("srv-badge"),pt("sw2"),RT(),pt("sw1"),pt("srv-med")],"info");if(my!==runId)return;
+      if(ok)fly([[1095,440],[1095,540],[1000,600]],"ok");else mark([1045,452],false);})();
+    const r=$("#bRes");r.className="verdict "+(ok?"ok":"bad");r.innerHTML=`<b>${ok?"Porte ouverte":"Accès refusé"}</b> à ${hm(t)}. ${esc(msg)} Le passage est enregistré.`;
+  };
+  $("#bRole").addEventListener("change",upd);$("#bDeg").addEventListener("change",upd);$("#bTime").addEventListener("input",upd);
+  upd();
+}
+
+
+/* ===================== THÈME CLAIR / SOMBRE ===================== */
+(function(){
+  const root=document.documentElement;
+  const SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  const MOON='<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
+  let t="light";try{const v=localStorage.getItem("sae502-theme");if(v==="dark"||v==="light")t=v;}catch(e){}
+  const apply=v=>{root.setAttribute("data-theme",v);$("#themeIco").innerHTML=v==="dark"?SUN:MOON;$("#themeLbl").textContent=v==="dark"?"Mode clair":"Mode sombre";};
+  apply(t);
+  $("#themeBtn").addEventListener("click",()=>{t=t==="dark"?"light":"dark";apply(t);try{localStorage.setItem("sae502-theme",t);}catch(e){}});
+})();
+/* ===================== VUE RÉSEAU ===================== */
+function setNet(on){svg.classList.toggle("net",on);$("#netBtn").setAttribute("aria-pressed",String(on));$("#legend").hidden=!on;setNetTint(on);}
+$("#netBtn").addEventListener("click",()=>setNet($("#netBtn").getAttribute("aria-pressed")!=="true"));
+renderIntro();
+
+/* ===================== TIROIR « LE PROJET » ===================== */
+function openDoc(id){const d=$("#drawer-"+id);if(!d)return;d.hidden=false;d.querySelector(".dclose").focus();}
+document.querySelectorAll(".drawer").forEach(d=>{
+  const c=d.querySelector(".dclose");if(c)c.addEventListener("click",()=>d.hidden=true);
+  d.addEventListener("click",e=>{if(e.target===d)d.hidden=true;});
+  const tabs=d.querySelector(".dtabs[data-doc]");
+  if(tabs)tabs.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;tabs.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",String(x===b)));d.querySelectorAll(".dbody[data-t]").forEach(x=>x.hidden=x.dataset.t!==b.dataset.t);d.querySelector(".drawer-in").scrollTop=0;});
+  d.querySelectorAll("[data-show]").forEach(b=>b.addEventListener("click",()=>{
+    d.hidden=true;const v=b.dataset.show;
+    if(v.startsWith("eq:"))showEq(v.slice(3));
+    else if(v.startsWith("room:"))showRoom(v.slice(5));
+    else if(v.startsWith("s:"))startScen(v.slice(2));
+    else if(v.startsWith("p:")){openTab("acc");runPerson(v.slice(2));}
+    else if(v==="acc"){openTab("acc");resetFx();renderAccess(null);}
+    else if(v==="net")setNet(true);
+  }));
+});
+$("#ipBtn").addEventListener("click",()=>openDoc("ip"));
+$("#dataBtn").addEventListener("click",()=>openDoc("data"));
+$("#secBtn").addEventListener("click",()=>openDoc("sec"));
+$("#vulnCat").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("#vulnCat").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));const c=b.dataset.cat;$("#vulnTbl").querySelectorAll("tbody tr").forEach(r=>r.hidden=c!=="Tout"&&r.dataset.cat!==c);});
+const dr=$("#drawer");
+$("#projBtn").addEventListener("click",()=>{dr.hidden=false;$("#drawerClose").focus();});
+$("#drawerClose").addEventListener("click",()=>dr.hidden=true);
+dr.addEventListener("click",e=>{if(e.target===dr)dr.hidden=true;});
+$("#dtabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("#dtabs").querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",String(x===b)));["team","gantt","trello","docs"].forEach(k=>$("#d-"+k).hidden=k!==b.dataset.t);});
+const MEM={"Grégoire":"var(--m-greg)","Dylan":"var(--m-dylan)","Jules":"var(--m-jules)","Flavio":"var(--m-flavio)","Équipe":"var(--m-team)"};
+// [id, tâche, responsables, jour de début (0 = 07/10), durée en jours, fait]
+const TASKS=[
+ ["1","Initialisation"],
+ ["1.1","Déclarer le projet et le groupe, lire le sujet","Équipe",0,1,1],["1.2","Créer le Trello et les listes de sprint","Grégoire",0,1,1],["1.3","Rédiger le cahier des charges V1.0","Dylan",0,1,1],["1.4","Réaliser le Gantt et le tableau de suivi","Dylan",0,1,1],["1.5","Préparer le rapport PPT et PDF","Grégoire, Dylan",0,1,1],["1.6","Diagrammes d’architecture","Dylan",0,1,0],["1.7","Choisir l’outil de maquette (GNS3 ou VM)","Équipe",0,1,0],
+ ["2","Planification"],
+ ["2.1","Plan d’adressage IP et VLAN","Jules",0,2,0],["2.2","Cahier des charges V2.0, mise à jour Trello/Gantt","Grégoire, Dylan",1,1,0],["2.3","Bases de données patients et personnel (Docker)","Flavio",1,1,0],["2.4","Serveur direction","Flavio",2,1,0],
+ ["3","Réalisation"],
+ ["3.1","VLAN et routage inter-VLAN (ACL)","Jules",1,1,0],["3.2","Serveur RADIUS (802.1X filaire)","Jules",1,1,0],["3.3","Wi-Fi 802.1X avec RADIUS","Jules",1,2,0],["3.4","VPN vers l’autre hôpital","Jules",2,1,0],["3.5","Sauvegardes, restauration, quotas","Flavio",1,2,0],["3.6","Réinstallation et bascule principal/secours","Flavio",2,1,0],["3.7","Supervision Nagios","Flavio",1,2,0],["3.8","Mode dégradé et gestion des badges","Flavio",1,2,0],
+ ["4","Contrôle et suivi"],
+ ["4.1","Remise du sprint 1 (07/10 avant 8h)","Équipe",0,1,0],["4.2","Remise du sprint 2 (08/10 avant minuit)","Équipe",1,1,0],["4.3","Tests d’accès par rôle","Jules",2,1,0],["4.4","Tests d’intrusion et contre-mesures","Jules",2,1,0],["4.5","Documentation technique et manuels","Dylan",1,2,0],["4.6","Vidéo de démonstration (3 min)","Équipe",2,1,0],
+ ["5","Clôture"],
+ ["5.1","Présentation finale enregistrée (15 min)","Équipe",2,1,0],["5.2","Rendu final (09/10 avant 12h)","Équipe",2,1,0]
+];
+const real=TASKS.filter(t=>t.length>2),doneN=real.filter(t=>t[5]).length;
+const load={};real.forEach(t=>t[2].split(", ").forEach(p=>load[p]=(load[p]||0)+t[4]));
+$("#kpis").innerHTML=`<div class="kpi"><b>${doneN} / ${real.length}</b><span>tâches terminées</span><div class="bar"><i style="width:${Math.round(doneN/real.length*100)}%"></i></div></div><div class="kpi"><b>14 %</b><span>avancement estimé (Gantt)</span><div class="bar"><i style="width:14%"></i></div></div><div class="kpi"><b>3 jours</b><span>du 07 au 09/10/2026</span></div><div class="kpi"><b>3 sprints</b><span>présentation 15 min + démo 3 min</span></div>`;
+function filters(box,cb){const names=["Tous","Grégoire","Dylan","Jules","Flavio","Équipe"];let cur="Tous";const draw=()=>{box.innerHTML=names.map(n=>`<button type="button" aria-pressed="${n===cur}" data-n="${n}">${n!=="Tous"?`<span class="dot" style="background:${MEM[n]}"></span>`:""}${n}${load[n]?` · ${load[n]} j`:""}</button>`).join("");};box.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;cur=b.dataset.n;draw();cb(cur);});draw();}
+(function(){
+  let h=`<div class="g-row hd"><div class="g-lab">Tâche</div><div class="g-days"><span>Mer 07/10</span><span>Jeu 08/10</span><span>Ven 09/10</span></div></div>`;
+  let gi=0;TASKS.forEach(t=>{gi++;if(t.length===2){h+=`<div class="g-row ph"><div class="g-lab"><span class="id">${t[0]}</span>${esc(t[1])}</div><div class="g-tr"></div></div>`;return;}
+    const c=MEM[t[2].split(", ")[0]];h+=`<div class="g-row" data-who="${esc(t[2])}"><div class="g-lab"><span class="id">${t[0]}</span><span>${esc(t[1])}</span></div><div class="g-tr"><div class="g-bar ${t[5]?"":"todo"}" style="--bc:${c};--d:${(gi*0.03).toFixed(2)}s;left:calc(${t[3]/3*100}% + 3px);width:calc(${t[4]/3*100}% - 6px)">${t[5]?"✓ ":""}${esc(t[2])}</div></div></div>`;});
+  const b=$("#gbody");b.innerHTML=h;
+  const ov=document.createElement("div");ov.style.cssText="position:absolute;top:0;bottom:0;left:290px;right:0;pointer-events:none";
+  [[8/72*100,"S1 · 07/10 8h",30],[200/3,"S2 · 08/10 minuit",30],[2.5/3*100,"S3 · 09/10 12h",44]].forEach(([p,l,top])=>ov.innerHTML+=`<div class="g-mark" style="left:${p}%"><span style="top:${top}px">${l}</span></div>`);
+  b.appendChild(ov);
+})();
+filters($("#gf"),n=>document.querySelectorAll("#gbody .g-row[data-who]").forEach(r=>r.classList.toggle("dim",n!=="Tous"&&!r.dataset.who.includes(n))));
+(function(){
+  const lists=[["1 – Initialisation",[]],["2 – Planification",[]],["3 – Réalisation",[]],["4 – Contrôle et suivi",[]],["5 – Clôture",[]],["Terminé",[]]];
+  real.forEach(t=>{const i=t[5]?5:(+t[0].split(".")[0]-1);lists[i][1].push(t);});
+  $("#board").innerHTML=lists.map(([n,cs])=>`<div class="blist"><h4>${esc(n)}<span>${cs.length}</span></h4>${cs.map((t,ci)=>`<div class="card" data-who="${esc(t[2])}" style="--d:${(ci*0.05).toFixed(2)}s"><div class="lb">${t[2].split(", ").map(w=>`<i style="--lc:${MEM[w]}">${esc(w)}</i>`).join("")}</div><div><span class="mono" style="color:var(--muted)">${t[0]}</span> ${esc(t[1])}</div><div class="meta">échéance ${["07/10","08/10","09/10"][Math.min(2,t[3]+t[4]-1)]} · ${t[5]?"<b>✓ fait</b>":"à faire"}</div></div>`).join("")}</div>`).join("");
+})();
+filters($("#tf"),n=>document.querySelectorAll("#board .card").forEach(c=>c.classList.toggle("dim",n!=="Tous"&&!c.dataset.who.includes(n))));
+const lb=$("#lb");
+document.querySelectorAll(".gallery [data-full]").forEach(b=>b.addEventListener("click",()=>{$("#lbImg").src=b.dataset.full;$("#lbImg").alt=b.querySelector("img").alt;lb.hidden=false;}));
+lb.addEventListener("click",()=>lb.hidden=true);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!lb.hidden)lb.hidden=true;else document.querySelectorAll(".drawer").forEach(d=>d.hidden=true);}});
+})();
+</script>
+
+</body>
+</html>
