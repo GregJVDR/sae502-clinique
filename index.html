@@ -507,6 +507,7 @@ ol.fcts li::marker{font-family:var(--f-mono);color:var(--accent);font-weight:700
           <tr><td class="m">radius.hopital.lan</td><td>40</td><td class="m">10.0.40.10</td><td>Authentification centralisée</td><td>FreeRADIUS</td><td><button type="button" class="see" data-show="eq:radius">Voir</button></td></tr>
           <tr><td class="m">dns.hopital.lan</td><td>40</td><td class="m">10.0.40.11</td><td>DNS de l’hôpital</td><td>dnsmasq ou BIND9</td><td><button type="button" class="see" data-show="eq:dns">Voir</button></td></tr>
           <tr><td class="m">srv-secours.hopital.lan</td><td>40</td><td class="m">10.0.40.20</td><td>Serveur de secours + sauvegardes</td><td>Scripts de sauvegarde, Docker</td><td><button type="button" class="see" data-show="eq:secours">Voir</button></td></tr>
+          <tr class="prop"><td class="m">srv-web.hopital.lan</td><td>40</td><td class="m">10.0.40.40</td><td>Portail interne (alias portail.hopital.lan) <span class="chip">proposition</span></td><td>Flask, nginx, Docker</td><td><button type="button" class="see" data-show="eq:srv-web">Voir</button></td></tr>
           <tr><td class="m">nagios.hopital.lan</td><td>40</td><td class="m">10.0.40.30</td><td>Supervision</td><td>Nagios</td><td><button type="button" class="see" data-show="eq:nagios">Voir</button></td></tr>
           <tr><td class="m">srv-badge.hopital.lan</td><td>50</td><td class="m">10.0.50.10</td><td>Gestion des badges (salle d’opération)</td><td>Code à développer</td><td><button type="button" class="see" data-show="eq:srv-badge">Voir</button></td></tr>
           <tr><td class="m">lecteur-badge.hopital.lan</td><td>50</td><td class="m">10.0.50.20</td><td>Lecteur de la porte</td><td>IoT, à préciser</td><td><button type="button" class="see" data-show="eq:badge">Voir</button></td></tr>
@@ -602,6 +603,15 @@ ol.fcts li::marker{font-family:var(--f-mono);color:var(--accent);font-weight:700
           <tr><td>13</td><td>Tout</td><td>La passerelle du VLAN</td><td>ICMP (ping)</td><td class="ok">Autoriser</td><td></td></tr>
           <tr><td>14</td><td>Postes (pas encore d’IP)</td><td>Le routeur (DHCP)</td><td>DHCP, UDP 67 et 68</td><td class="ok">Autoriser</td><td></td></tr>
           <tr><td>15</td><td>Tout</td><td>Tout</td><td>Tout</td><td class="ko">Refuser et journaliser</td><td><button type="button" class="see" data-show="s:pirate">Voir</button></td></tr>
+        </tbody>
+      </table></div>
+      <h3>Règles proposées pour le portail interne (à placer avant la règle 15)</h3>
+      <div class="tblw"><table>
+        <thead><tr><th>Source</th><th>Destination</th><th>Service</th><th>Action</th><th></th></tr></thead>
+        <tbody>
+          <tr class="prop"><td>VLAN 10, 20, 30 (et 70 patients, option)</td><td>srv-web (10.0.40.40)</td><td>HTTPS, TCP 443</td><td class="ok">Autoriser</td><td><button type="button" class="see" data-show="s:portail">Voir</button></td></tr>
+          <tr class="prop"><td>srv-web (10.0.40.40)</td><td>srv-med, srv-adm</td><td>MariaDB, TCP 3306</td><td class="ok">Autoriser</td><td></td></tr>
+          <tr class="prop"><td>10.1.30.0/24 (autre hôpital)</td><td>srv-web</td><td>Tout</td><td class="ko">Refuser</td><td></td></tr>
         </tbody>
       </table></div>
     </div>
@@ -1010,6 +1020,8 @@ const EQ={
     text:"Décide si un badge ouvre la porte du bloc. Il demande à la base des patients si une opération est en cours (règle 10). Code à développer."},
   "srv-vpn":{x:852,y:343,k:"server",room:"tech",vlan:60,sw:"sw2",lab:"VPN",dns:"srv-vpn",name:"Serveur VPN (WireGuard)",ip:"eth0 10.0.60.10 · eth1 172.16.0.1",
     text:"Extrémité du tunnel chiffré vers l’autre hôpital. Sa seconde carte réseau (eth1) est reliée par un câble direct au serveur VPN du partenaire. Le routeur lui envoie le trafic destiné au réseau médical distant 10.1.30.0/24."},
+  "srv-web":{x:750,y:318,k:"server",room:"tech",vlan:40,sw:"sw2",lab:"Portail",dns:"srv-web",name:"Portail interne (srv-web)",ip:"10.0.40.40 · https://portail.hopital.lan · proposition",
+    text:"Le site intranet de la clinique. Le personnel s’y connecte avec son identifiant RADIUS (le même que pour le Wi-Fi et les prises) ; les patients avec un compte patient. Chacun voit des informations différentes : la direction des indicateurs sans noms, l’administration l’identité et les rendez-vous, le médical les dossiers complets, l’entretien le planning anonyme du bloc, le patient uniquement ses propres données. Chaque profil lit les bases avec son propre compte MariaDB aux droits minimaux."},
   nagios:{x:700,y:344,k:"pc",room:"tech",vlan:40,sw:"sw2",lab:"Supervision",dns:"nagios",name:"Supervision (Nagios)",ip:"10.0.40.30",
     text:"Surveille en permanence les équipements et les serveurs (ping, SNMP, NRPE) et alerte le service informatique dès qu’un élément ne répond plus."},
   "pc-dir1":{x:145,y:209,k:"pc",room:"dir",vlan:10,sw:"sw1",name:"Poste de la direction",ip:"DHCP 10.0.10.100 à .200",text:"Branché sur une prise protégée par 802.1X. Une fois la directrice identifiée (groupe direction), le poste rejoint le VLAN 10 et reçoit son adresse."},
@@ -1224,6 +1236,7 @@ function renderIntro(){
     <button type="button" data-go="doc:ip">Plan d’adressage complet</button>
     <button type="button" data-go="doc:data">Rôles, échanges et données</button>
     <button type="button" data-go="doc:sec">Sécurité : vulnérabilités et tests</button>
+    <button type="button" data-go="s:portail">Le portail interne</button>
     <button type="button" data-go="room:tech">Le local technique</button>
   </div>
   <p class="lead" style="font-size:.8rem">Matériel : 1 routeur Cisco 1841, 2 switches Cisco Catalyst, des bornes Wi-Fi Linksys WRT54G sous DD-WRT, des serveurs et des postes compatibles 802.1X. L’architecture est d’abord validée sur une maquette GNS3, puis montée sur le vrai matériel.</p>`;
@@ -1269,6 +1282,7 @@ function showEq(id){
     secours:`<div class="links"><button type="button" data-go="s:panne">Scénario : panne du serveur médical</button><button type="button" data-go="s:ransom">Scénario rançongiciel</button></div>`,
     dns:`<div class="links"><button type="button" data-go="s:panne">Voir la bascule par le DNS</button></div>`,
     "srv-vpn":`<div class="links"><button type="button" data-go="s:vpn">Échange avec l’autre hôpital</button></div>`,
+    "srv-web":`<div class="links"><button type="button" data-go="s:portail">Voir une connexion au portail</button></div>`,
     "srv-badge":`<div class="links"><button type="button" data-go="s:bloc">Tester la porte à badge</button></div>`,
     secours:`<div class="links"><button type="button" data-go="s:panne">Scénario panne de serveur</button></div>`,
     nagios:`<div class="links"><button type="button" data-go="s:panne">Scénario panne de serveur</button></div>`,
@@ -1377,6 +1391,12 @@ const SCEN={
     {t:"Après la copie, un script vérifie l’espace disque et supprime les copies les plus anciennes (proposition : on garde les 7 derniers jours).",a:async i=>{EQ.secours.g.classList.add("good");bubble(pt("secours"),"disque : 62 %",-26);await wait(400,i);}},
     {t:"Si le disque dépasse 80 %, Nagios alerte le service informatique avant que les sauvegardes échouent : on ajoute de l’espace ou on réduit la durée de conservation.",a:async i=>{EQ.secours.g.classList.add("bad");EQ.nagios.g.classList.add("hl");bubble(pt("secours"),"disque : 85 %",-26);await fly([pt("secours"),pt("sw2"),pt("nagios")],"bad",i,false);bubble(pt("nagios"),"alerte quota",-24);}},
     {t:"Sur les serveurs de fichiers, un quota par utilisateur empêche un seul compte de remplir le disque. Une fois par semaine, on teste une restauration pour prouver que les sauvegardes sont utilisables.",a:async i=>{EQ["srv-dir"].g.classList.add("hl");bubble(pt("srv-dir"),"quota par utilisateur",-26);await fly([pt("secours"),pt("sw2"),RT(),pt("sw1"),pt("srv-dir")],"ok",i);}}
+  ]},
+  portail:{title:"Un médecin se connecte au portail",sub:"Site intranet relié à RADIUS et aux bases",steps:[
+    {t:"Le médecin ouvre https://portail.hopital.lan depuis son poste. La page arrive du serveur srv-web (10.0.40.40), en HTTPS.",a:async i=>{PEOPLE.medecin.g.classList.add("hl");EQ["srv-web"].g.classList.add("hl");await fly(toSwitchPts("pc-cons").concat([RT(),pt("sw2"),pt("srv-web")]),"info",i);}},
+    {t:"Il saisit son identifiant med01 et son mot de passe habituel. Le portail ne vérifie rien lui-même : il pose la question au serveur RADIUS, comme le ferait un switch.",a:async i=>{EQ["srv-web"].g.classList.add("hl");EQ.radius.g.classList.add("hl");await fly([pt("srv-web"),pt("sw2"),pt("radius")],"info",i);}},
+    {t:"FreeRADIUS lit le compte dans la base du personnel (le même compte que pour le Wi-Fi et le 802.1X), puis répond « accepté », avec le profil médical.",a:async i=>{EQ.radius.g.classList.add("hl");await fly([pt("radius"),pt("sw2"),RT(),pt("sw1"),pt("srv-adm")],"info",i);await fly([pt("radius"),pt("sw2"),pt("srv-web")],"ok",i,false);bubble(pt("srv-web"),"accepté · profil médical",-26);}},
+    {t:"Le portail lit les dossiers dans la base des patients avec le compte « portail_medical ». Une secrétaire, connectée de la même façon, n’aurait que l’identité et les rendez-vous ; l’entretien, le planning du bloc sans aucun nom.",a:async i=>{EQ["srv-web"].g.classList.add("good");EQ["srv-med"].g.classList.add("good");await fly([pt("srv-web"),pt("sw2"),RT(),pt("sw1"),pt("srv-med")],"ok",i);bubble(pt("srv-med"),"dossiers complets",-26);}}
   ]},
   wifi:{title:"Une borne Wi-Fi tombe en panne",sub:"Deux bornes, un seul réseau Wi-Fi",steps:[
     {t:"Deux bornes diffusent le même réseau Wi-Fi « HOPITAL » : la n°1 dans la salle de soins, la n°2 de l’autre côté du couloir, dans l’administration. Leurs zones de couverture se recouvrent. L’infirmier est connecté à la plus proche, la n°1.",a:async i=>{svg.classList.add("showcov");PEOPLE.infirmier.g.classList.add("hl");EQ.ap.g.classList.add("good");EQ.ap2.g.classList.add("hl");await fly(rule("infirmier","srv-med").pts,"ok",i);}},
